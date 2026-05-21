@@ -54,6 +54,7 @@ function normalizeProtocol(item: ProtocolApiItem): Protocol {
     closingDate: item.closing_date ?? null,
     lastObservation: item.last_observation ?? null,
     assignedTo: item.assigned_to ?? null,
+    assignedToName: item.assigned_to_name ?? null,
     notes: item.notes ?? null,
     changeLogs,
   };

@@ -18,6 +18,7 @@ export type Protocol = {
   closingDate?: string | null;
   lastObservation?: string | null;
   assignedTo?: string | null;
+  assignedToName?: string | null;
   notes?: string | null;
   changeLogs?: ProtocolChangeLog[];
 };
@@ -71,6 +72,7 @@ export type ProtocolApiItem = {
   owner?: string | null;
   responsavel?: string | null;
   assigned_to?: string | null;
+  assigned_to_name?: string | null;
   opening_date?: string | null;
   closing_date?: string | null;
   last_observation?: string | null;

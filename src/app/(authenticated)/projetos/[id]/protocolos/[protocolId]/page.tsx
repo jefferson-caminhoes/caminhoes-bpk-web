@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { listStakeholders } from "@/services/stakeholders-service";
+import { listUsers } from "@/services/users-service";
 import {
   createProtocolScrapingJob,
   finalizeProtocol,
@@ -17,6 +18,7 @@ import {
 import { projectProtocolsRoute } from "@/lib/routes";
 import type { Protocol } from "@/types/protocol";
 import type { Stakeholder } from "@/types/stakeholder";
+import type { User } from "@/types/user";
 
 const protocolSchema = z.object({
   activity: z.string().min(1, "Atividade e obrigatoria."),
@@ -48,6 +50,7 @@ export default function ProtocoloDetalhePage() {
 
   const [protocol, setProtocol] = useState<Protocol | null>(null);
   const [stakeholders, setStakeholders] = useState<Stakeholder[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -76,18 +79,20 @@ export default function ProtocoloDetalhePage() {
     async function loadData() {
       try {
         setErrorMessage(null);
-        const [protocolData, stakeholdersData] = await Promise.all([
+        const [protocolData, stakeholdersData, usersData] = await Promise.all([
           getProtocolById(projectId, protocolId),
           listStakeholders(),
+          listUsers(true),
         ]);
         setProtocol(protocolData);
         setStakeholders(stakeholdersData);
+        setUsers(usersData);
         reset({
           activity: protocolData.activity,
           protocolNumber: protocolData.protocolNumber,
           cnpj: protocolData.cnpj,
           stakeholderId: protocolData.stakeholderId,
-          owner: protocolData.owner ?? "",
+          owner: protocolData.assignedTo ?? "",
           manualStatus: protocolData.manualStatus ?? "",
           situation: protocolData.situation ?? "",
           monitoringEnabled: protocolData.monitoringEnabled,
@@ -165,7 +170,7 @@ export default function ProtocoloDetalhePage() {
         protocolNumber: updated.protocolNumber,
         cnpj: updated.cnpj,
         stakeholderId: updated.stakeholderId,
-        owner: updated.owner ?? "",
+        owner: updated.assignedTo ?? "",
         manualStatus: updated.manualStatus ?? "",
         situation: updated.situation ?? "",
         monitoringEnabled: updated.monitoringEnabled,
@@ -190,7 +195,7 @@ export default function ProtocoloDetalhePage() {
         protocolNumber: updated.protocolNumber,
         cnpj: updated.cnpj,
         stakeholderId: updated.stakeholderId,
-        owner: updated.owner ?? "",
+        owner: updated.assignedTo ?? "",
         manualStatus: updated.manualStatus ?? "",
         situation: updated.situation ?? "",
         monitoringEnabled: updated.monitoringEnabled,
@@ -256,7 +261,7 @@ export default function ProtocoloDetalhePage() {
         </div>
       ) : null}
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
+      <div className="mt-6 grid gap-4 md:grid-cols-3">
         <article className="rounded-lg border border-zinc-200 bg-white p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
             Status manual
@@ -271,6 +276,14 @@ export default function ProtocoloDetalhePage() {
           </p>
           <p className="mt-2 text-lg font-semibold text-zinc-900">
             {protocol?.externalStatus ?? "Nao informado"}
+          </p>
+        </article>
+        <article className="rounded-lg border border-zinc-200 bg-white p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            Responsavel
+          </p>
+          <p className="mt-2 text-lg font-semibold text-zinc-900">
+            {protocol?.assignedToName ?? "Sem responsavel"}
           </p>
         </article>
       </div>
@@ -356,12 +369,18 @@ export default function ProtocoloDetalhePage() {
             <label className="text-sm font-medium text-zinc-700" htmlFor="owner">
               Responsavel
             </label>
-            <input
+            <select
               id="owner"
-              type="text"
               {...register("owner")}
-              className="mt-2 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-            />
+              className="mt-2 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
+            >
+              <option value="">Sem responsavel</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="text-sm font-medium text-zinc-700" htmlFor="manualStatus">
