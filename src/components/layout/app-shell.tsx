@@ -41,7 +41,10 @@ export function AppShell({ children }: AppShellProps) {
     <div className="min-h-screen bg-background text-foreground">
       <div className="flex min-h-screen">
         <aside className="sticky top-0 hidden h-screen w-72 shrink-0 border-r border-slate-200 bg-white px-5 py-6 md:flex md:flex-col">
-          <Link href={appRoutes.dashboard} className="group block">
+          <Link
+            href={appRoutes.dashboard}
+            className="group flex w-full items-center justify-center"
+          >
             <BrandLogo size="sm" />
           </Link>
 

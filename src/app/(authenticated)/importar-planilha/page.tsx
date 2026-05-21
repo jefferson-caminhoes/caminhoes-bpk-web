@@ -146,64 +146,6 @@ export default function ImportarPlanilhaPage() {
         <LoadingPanel message="Processando importacao..." />
       ) : null}
 
-      {summary ? (
-        <div className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-3">
-            <article className="rounded-2xl border border-slate-300 bg-white p-5 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Projetos criados
-              </p>
-              <p className="mt-2 text-3xl font-semibold text-[#092946]">
-                {summary.projectsCreated}
-              </p>
-            </article>
-            <article className="rounded-2xl border border-slate-300 bg-white p-5 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Protocolos criados
-              </p>
-              <p className="mt-2 text-3xl font-semibold text-[#092946]">
-                {summary.protocolsCreated}
-              </p>
-            </article>
-            <article className="rounded-2xl border border-[#ee2331]/40 bg-white p-5 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#ee2331]">
-                Linhas ignoradas
-              </p>
-              <p className="mt-2 text-3xl font-semibold text-[#ee2331]">
-                {summary.ignoredRows}
-              </p>
-            </article>
-          </div>
-
-          {hasErrors ? (
-            <div className="rounded-2xl border border-red-300 bg-[#fff1f2] p-5 shadow-sm">
-              <h3 className="inline-flex items-center gap-2 text-sm font-semibold text-[#b5121f]">
-                <XCircle size={16} />
-                Erros encontrados
-              </h3>
-              <ul className="mt-3 space-y-2 text-sm text-[#b5121f]">
-                {summary.errors.map((item, index) => (
-                  <li
-                    key={`${item.message}-${index}`}
-                    className="rounded-xl border border-red-200 bg-white px-3 py-2"
-                  >
-                    {(item.line ?? item.row) ? `Linha ${item.line ?? item.row}: ` : ""}
-                    {item.field ? `${item.field} - ` : ""}
-                    {item.message}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700 shadow-sm">
-              <span className="inline-flex items-center gap-2">
-                <CheckCircle2 size={16} />
-                Importacao concluida sem erros de linha.
-              </span>
-            </div>
-          )}
-        </div>
-      ) : null}
     </section>
   );
 }

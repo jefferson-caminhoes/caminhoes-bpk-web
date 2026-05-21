@@ -1,4 +1,5 @@
 import type { HistoryPoint, ProjectReport } from "@/lib/project-reporting";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 
 type ExportSummary = {
   selectionLabel: string;
@@ -54,48 +55,120 @@ function wrapText(value: string, maxLength = 88) {
   return lines.length > 0 ? lines : [value];
 }
 
+function buildBar(value: number, max: number, width = 28) {
+  if (max <= 0) return "";
+  const filled = Math.max(1, Math.round((value / max) * width));
+  return "#".repeat(filled).padEnd(width, "-");
+}
+
+type PdfLine = {
+  text: string;
+  font: "F1" | "F2";
+  size: number;
+  x: number;
+  y: number;
+};
+
 function buildPdfPages(summary: ExportSummary) {
-  const pages: string[][] = [];
-  const header = [
-    `Relatorio de empreendimentos - ${summary.selectionLabel}`,
+  const pages: PdfLine[][] = [];
+  const pageHeight = 842;
+  const margin = 40;
+  let currentPage: PdfLine[] = [];
+  let cursorY = pageHeight - margin;
+
+  const pushLine = (text: string, font: PdfLine["font"], size: number, spacing = 18) => {
+    if (cursorY < margin + spacing) {
+      pages.push(currentPage);
+      currentPage = [];
+      cursorY = pageHeight - margin;
+    }
+    currentPage.push({ text, font, size, x: margin, y: cursorY });
+    cursorY -= spacing;
+  };
+
+  const pushSection = (title: string) => {
+    pushLine(title, "F2", 14, 22);
+  };
+
+  const addWrappedLines = (text: string) => {
+    wrapText(text, 96).forEach((line) => pushLine(line, "F1", 11));
+  };
+
+  pushLine("Relatorio de empreendimentos", "F2", 20, 28);
+  pushLine(summary.selectionLabel, "F1", 12, 22);
+
+  pushSection("Metricas chave");
+  pushLine(`Projetos: ${summary.totalProjects}`, "F2", 16, 22);
+  pushLine(`Protocolos: ${summary.totalProtocols}`, "F2", 16, 22);
+  pushLine(`Monitorados: ${summary.monitoredProtocols}`, "F2", 16, 22);
+  pushLine(`Divergentes: ${summary.divergentProtocols}`, "F2", 16, 22);
+  pushLine(`Nao encontrados: ${summary.notFoundProtocols}`, "F2", 16, 22);
+
+  const chartMax = Math.max(
+    1,
+    summary.monitoredProtocols,
+    summary.divergentProtocols,
+    summary.notFoundProtocols,
+  );
+  pushSection("Grafico rapido (volume)");
+  pushLine(
+    `Monitorados  | ${buildBar(summary.monitoredProtocols, chartMax)} ${summary.monitoredProtocols}`,
+    "F1",
+    11,
+  );
+  pushLine(
+    `Divergentes  | ${buildBar(summary.divergentProtocols, chartMax)} ${summary.divergentProtocols}`,
+    "F1",
+    11,
+  );
+  pushLine(
+    `Nao encontrados | ${buildBar(summary.notFoundProtocols, chartMax)} ${summary.notFoundProtocols}`,
+    "F1",
+    11,
+  );
+
+  pushSection("Resumo geral");
+  addWrappedLines(
     `Projetos: ${summary.totalProjects} | Protocolos: ${summary.totalProtocols} | Monitorados: ${summary.monitoredProtocols}`,
+  );
+  addWrappedLines(
     `Divergentes: ${summary.divergentProtocols} | Nao encontrados: ${summary.notFoundProtocols}`,
+  );
+  addWrappedLines(
     `Atividade 30d: ${summary.trendComparison.current} eventos | 30d anteriores: ${summary.trendComparison.previous} | Delta: ${summary.trendComparison.delta.toFixed(1)}%`,
-    "",
-    "Tendencia historica:",
-    ...summary.trend.map((point) => `${point.label}: ${point.value}`),
-    "",
-    "Empreendimentos prioritarios:",
-    ...summary.projects
-      .slice()
-      .sort((a, b) => b.riskScore - a.riskScore)
-      .slice(0, 12)
-      .flatMap((report) =>
-        wrapText(
-          `${report.project.name} | risco ${report.riskScore} | protocolos ${report.totalProtocols} | divergentes ${report.divergentProtocols} | nao encontrados ${report.notFoundProtocols}`,
-        ),
-      ),
-  ];
+  );
 
-  const events = [
-    "Mudancas recentes:",
-    ...summary.recentEvents.map((event) =>
+  pushSection("Tendencia historica");
+  summary.trend.forEach((point) =>
+    pushLine(`${point.label}: ${point.value}`, "F1", 11),
+  );
+
+  pushSection("Empreendimentos prioritarios");
+  summary.projects
+    .slice()
+    .sort((a, b) => b.riskScore - a.riskScore)
+    .slice(0, 12)
+    .forEach((report) => {
+      addWrappedLines(
+        `- ${report.project.name} | risco ${report.riskScore} | protocolos ${report.totalProtocols} | divergentes ${report.divergentProtocols} | nao encontrados ${report.notFoundProtocols}`,
+      );
+    });
+
+  pushSection("Mudancas recentes");
+  summary.recentEvents.forEach((event) => {
+    addWrappedLines(
       `${event.projectName}${event.protocolLabel ? ` / ${event.protocolLabel}` : ""} | ${event.action} | ${event.description} | ${event.createdAt ?? "sem data"}`,
-    ),
-  ];
+    );
+  });
 
-  const linesPerPage = 36;
-  for (let index = 0; index < header.length; index += linesPerPage) {
-    pages.push(header.slice(index, index + linesPerPage));
-  }
-  for (let index = 0; index < events.length; index += linesPerPage) {
-    pages.push(events.slice(index, index + linesPerPage));
+  if (currentPage.length > 0) {
+    pages.push(currentPage);
   }
 
   return pages;
 }
 
-function buildPdfDocument(pages: string[][]) {
+function buildPdfDocument(pages: PdfLine[][]) {
   const objects: string[] = [];
   const pageObjects: number[] = [];
 
@@ -105,23 +178,25 @@ function buildPdfDocument(pages: string[][]) {
   };
 
   const fontRef = addObject("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+  const boldFontRef = addObject("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
 
   for (const lines of pages) {
     const contentLines = [
       "BT",
-      "/F1 12 Tf",
-      "1 0 0 1 40 800 Tm",
-      ...lines.flatMap((line, index) => {
-        const escaped = escapePdfText(line);
-        const y = 800 - index * 18;
-        return [`1 0 0 1 40 ${y} Tm`, `(${escaped}) Tj`];
+      ...lines.flatMap((line) => {
+        const escaped = escapePdfText(line.text);
+        return [
+          `/${line.font} ${line.size} Tf`,
+          `1 0 0 1 ${line.x} ${line.y} Tm`,
+          `(${escaped}) Tj`,
+        ];
       }),
       "ET",
     ];
     const content = contentLines.join("\n");
     const contentRef = addObject(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
     const pageRef = addObject(
-      `<< /Type /Page /Parent 0 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${fontRef} 0 R >> >> /Contents ${contentRef} 0 R >>`,
+      `<< /Type /Page /Parent 0 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${fontRef} 0 R /F2 ${boldFontRef} 0 R >> >> /Contents ${contentRef} 0 R >>`,
     );
     pageObjects.push(pageRef);
   }
@@ -203,25 +278,134 @@ function buildSpreadsheetXml(summary: ExportSummary) {
   const sheet = (name: string, rows: string[][]) => `
     <Worksheet ss:Name="${escapeXml(name)}">
       <Table>
+        <Column ss:Width="240" />
+        <Column ss:Width="200" />
+        ${rows
+          .map((row, rowIndex) =>
+            `<Row>${row
+              .map((cell, cellIndex) => {
+                const styleId = rowIndex === 0
+                  ? "Header"
+                  : cellIndex === 0
+                    ? "Key"
+                    : "Body";
+                return `<Cell ss:StyleID="${styleId}"><Data ss:Type="String">${escapeXml(cell)}</Data></Cell>`;
+              })
+              .join("")}</Row>`,
+          )
+          .join("")}
+      </Table>
+    </Worksheet>`;
+
+  const tableSheet = (name: string, rows: string[][]) => `
+    <Worksheet ss:Name="${escapeXml(name)}">
+      <Table>
+        ${rows[0]?.map(() => "<Column ss:Width=\"150\" />").join("") ?? ""}
         ${rows
           .map(
             (row) =>
               `<Row>${row
-                .map((cell) => `<Cell><Data ss:Type="String">${escapeXml(cell)}</Data></Cell>`)
+                .map((cell, index) => {
+                  const styleId = row === rows[0]
+                    ? "Header"
+                    : index === 0
+                      ? "Key"
+                      : "Body";
+                  return `<Cell ss:StyleID="${styleId}"><Data ss:Type="String">${escapeXml(cell)}</Data></Cell>`;
+                })
                 .join("")}</Row>`,
           )
           .join("")}
       </Table>
     </Worksheet>`;
 
+  const metricsSheet = (name: string, rows: string[][]) => `
+    <Worksheet ss:Name="${escapeXml(name)}">
+      <Table>
+        <Column ss:Width="180" />
+        <Column ss:Width="120" />
+        <Column ss:Width="220" />
+        ${rows
+          .map((row, rowIndex) =>
+            `<Row>${row
+              .map((cell, cellIndex) => {
+                if (rowIndex === 0) {
+                  return `<Cell ss:StyleID="Header"><Data ss:Type="String">${escapeXml(cell)}</Data></Cell>`;
+                }
+                const styleId = cellIndex === 1 ? "Metric" : cellIndex === 0 ? "Key" : "Body";
+                return `<Cell ss:StyleID="${styleId}"><Data ss:Type="String">${escapeXml(cell)}</Data></Cell>`;
+              })
+              .join("")}</Row>`,
+          )
+          .join("")}
+      </Table>
+    </Worksheet>`;
+
+  const chartMax = Math.max(
+    1,
+    summary.monitoredProtocols,
+    summary.divergentProtocols,
+    summary.notFoundProtocols,
+  );
+  const metricsRows = [
+    ["Indicador", "Valor", "Grafico"],
+    ["Projetos", String(summary.totalProjects), buildBar(summary.totalProjects, summary.totalProjects || 1, 18)],
+    ["Protocolos", String(summary.totalProtocols), buildBar(summary.totalProtocols, summary.totalProtocols || 1, 18)],
+    ["Monitorados", String(summary.monitoredProtocols), buildBar(summary.monitoredProtocols, chartMax, 18)],
+    ["Divergentes", String(summary.divergentProtocols), buildBar(summary.divergentProtocols, chartMax, 18)],
+    ["Nao encontrados", String(summary.notFoundProtocols), buildBar(summary.notFoundProtocols, chartMax, 18)],
+  ];
+
   return `<?xml version="1.0"?>
   <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
     xmlns:o="urn:schemas-microsoft-com:office:office"
     xmlns:x="urn:schemas-microsoft-com:office:excel"
     xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+    <Styles>
+      <Style ss:ID="Header">
+        <Font ss:Bold="1" ss:Color="#FFFFFF" />
+        <Interior ss:Color="#092946" ss:Pattern="Solid" />
+        <Alignment ss:Horizontal="Center" ss:Vertical="Center" />
+        <Borders>
+          <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D5DB" />
+          <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D5DB" />
+          <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D5DB" />
+          <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D5DB" />
+        </Borders>
+      </Style>
+      <Style ss:ID="Key">
+        <Font ss:Bold="1" />
+        <Interior ss:Color="#F1F5F9" ss:Pattern="Solid" />
+        <Borders>
+          <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0" />
+          <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0" />
+          <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0" />
+          <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0" />
+        </Borders>
+      </Style>
+      <Style ss:ID="Body">
+        <Borders>
+          <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0" />
+          <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0" />
+          <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0" />
+          <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0" />
+        </Borders>
+      </Style>
+      <Style ss:ID="Metric">
+        <Font ss:Bold="1" ss:Size="13" />
+        <Interior ss:Color="#FFF1F2" ss:Pattern="Solid" />
+        <Borders>
+          <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FBCFE8" />
+          <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FBCFE8" />
+          <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FBCFE8" />
+          <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FBCFE8" />
+        </Borders>
+      </Style>
+    </Styles>
     ${sheet("Resumo", headerRows)}
-    ${sheet("Empreendimentos", projectRows)}
-    ${sheet("Mudancas", eventRows)}
+    ${metricsSheet("Metricas", metricsRows)}
+    ${tableSheet("Empreendimentos", projectRows)}
+    ${tableSheet("Mudancas", eventRows)}
   </Workbook>`;
 }
 
@@ -235,8 +419,121 @@ function downloadBlob(blob: Blob, filename: string) {
 }
 
 export function exportProjectsPdf(summary: ExportSummary) {
-  const blob = buildPdfDocument(buildPdfPages(summary));
-  downloadBlob(blob, `relatorio-empreendimentos.pdf`);
+  // Fallback to legacy generator if running server-side
+  if (typeof document === "undefined") {
+    const blob = buildPdfDocument(buildPdfPages(summary));
+    downloadBlob(blob, `relatorio-empreendimentos.pdf`);
+    return;
+  }
+
+  (async () => {
+    try {
+      const pdfDoc = await PDFDocument.create();
+      const page = pdfDoc.addPage([595, 842]);
+      const { width, height } = page.getSize();
+
+      // Load logo from public folder
+      let logoBytes: ArrayBuffer | null = null;
+      try {
+        const res = await fetch("/logo-sistema.png");
+        if (res.ok) logoBytes = await res.arrayBuffer();
+      } catch (e) {
+        logoBytes = null;
+      }
+
+      if (logoBytes) {
+        const logoImage = await pdfDoc.embedPng(logoBytes);
+        const imgWidth = 96;
+        const imgHeight = (logoImage.height / logoImage.width) * imgWidth;
+        page.drawImage(logoImage, { x: (width - imgWidth) / 2, y: height - 80, width: imgWidth, height: imgHeight });
+      }
+
+      const now = new Date();
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+      page.drawText("Relatorio de empreendimentos", { x: 40, y: height - 110, size: 18, font: bold });
+      page.drawText(`Escopo: ${summary.selectionLabel}`, { x: 40, y: height - 128, size: 10, font });
+      page.drawText(`Gerado em: ${now.toLocaleString()}`, { x: width - 220, y: height - 110, size: 10, font, color: rgb(0.35, 0.35, 0.35) });
+
+      // Build a small PNG chart and embed
+      const chartDataUrl = buildChartDataUrl(summary, 520, 140);
+      const chartResp = await fetch(chartDataUrl);
+      const chartBytes = await chartResp.arrayBuffer();
+      const chartImage = await pdfDoc.embedPng(chartBytes);
+      const chartDrawWidth = 520;
+      const chartDrawHeight = (chartImage.height / chartImage.width) * chartDrawWidth;
+      page.drawImage(chartImage, { x: (width - chartDrawWidth) / 2, y: height - 340, width: chartDrawWidth, height: chartDrawHeight });
+
+      // Key metrics
+      const metricsX = 40;
+      let metricsY = height - 380 - chartDrawHeight;
+      const metricSpacing = 16;
+      page.drawText(`Projetos: ${summary.totalProjects}`, { x: metricsX, y: metricsY, size: 12, font: bold });
+      metricsY -= metricSpacing;
+      page.drawText(`Protocolos: ${summary.totalProtocols}`, { x: metricsX, y: metricsY, size: 12, font: bold });
+      metricsY -= metricSpacing;
+      page.drawText(`Monitorados: ${summary.monitoredProtocols}`, { x: metricsX, y: metricsY, size: 12, font: bold });
+      metricsY -= metricSpacing;
+      page.drawText(`Divergentes: ${summary.divergentProtocols}`, { x: metricsX, y: metricsY, size: 12, font: bold });
+      metricsY -= metricSpacing;
+      page.drawText(`Nao encontrados: ${summary.notFoundProtocols}`, { x: metricsX, y: metricsY, size: 12, font: bold });
+
+      const pdfBytes = await pdfDoc.save();
+      downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), `relatorio-empreendimentos.pdf`);
+    } catch (err) {
+      // Fallback to legacy implementation on error
+      const blob = buildPdfDocument(buildPdfPages(summary));
+      downloadBlob(blob, `relatorio-empreendimentos.pdf`);
+    }
+  })();
+}
+
+function buildChartDataUrl(summary: ExportSummary, width = 520, height = 140) {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return "";
+
+  // background
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, height);
+
+  const padding = 24;
+  const chartW = width - padding * 2;
+  const chartH = height - padding * 2;
+
+  const values = [summary.monitoredProtocols, summary.divergentProtocols, summary.notFoundProtocols];
+  const labels = ["Monitorados", "Divergentes", "Nao encontrados"];
+  const colors = ["#0ea5e9", "#fb7185", "#f97316"];
+  const max = Math.max(1, ...values);
+
+  const barGap = 16;
+  const barWidth = (chartW - barGap * (values.length - 1)) / values.length;
+
+  for (let i = 0; i < values.length; i++) {
+    const v = values[i];
+    const h = Math.round((v / max) * chartH);
+    const x = padding + i * (barWidth + barGap);
+    const y = padding + (chartH - h);
+    ctx.fillStyle = colors[i];
+    ctx.fillRect(x, y, barWidth, h);
+
+    // value label
+    ctx.fillStyle = "#000000";
+    ctx.font = "12px sans-serif";
+    ctx.fillText(String(v), x + 4, y - 6);
+
+    // label
+    ctx.fillStyle = "#334155";
+    ctx.font = "11px sans-serif";
+    const label = labels[i];
+    const labelX = x + 2;
+    ctx.fillText(label, labelX, padding + chartH + 14);
+  }
+
+  return canvas.toDataURL("image/png");
 }
 
 export function exportProjectsExcel(summary: ExportSummary) {

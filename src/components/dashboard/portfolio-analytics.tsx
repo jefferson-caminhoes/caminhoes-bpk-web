@@ -546,18 +546,24 @@ export function PortfolioAnalytics() {
             <button
               type="button"
               onClick={handleExportPdf}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-slate-600 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:border-[#ee2331]/60 hover:bg-[#ee2331]/15"
+              className="group relative inline-flex min-h-11 items-center justify-center gap-2 overflow-hidden rounded-2xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:border-[#ee2331]/60"
             >
-              <Download size={16} />
-              PDF
+              <span className="absolute inset-0 bg-gradient-to-r from-[#ee2331]/20 via-white/10 to-[#ff9da5]/20 opacity-0 transition group-hover:opacity-100" />
+              <span className="relative inline-flex items-center gap-2">
+                <Download size={16} />
+                PDF
+              </span>
             </button>
             <button
               type="button"
               onClick={handleExportExcel}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-slate-600 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:border-[#ee2331]/60 hover:bg-[#ee2331]/15"
+              className="group relative inline-flex min-h-11 items-center justify-center gap-2 overflow-hidden rounded-2xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:border-emerald-300/60"
             >
-              <FileSpreadsheet size={16} />
-              Excel
+              <span className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 via-white/10 to-emerald-200/20 opacity-0 transition group-hover:opacity-100" />
+              <span className="relative inline-flex items-center gap-2">
+                <FileSpreadsheet size={16} />
+                Excel
+              </span>
             </button>
           </div>
         </div>
