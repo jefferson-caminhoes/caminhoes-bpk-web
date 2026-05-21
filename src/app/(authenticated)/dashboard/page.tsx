@@ -12,23 +12,8 @@ import {
 } from "lucide-react";
 import { ErrorPanel, LoadingPanel } from "@/components/ui/feedback";
 import { getDashboardSummary } from "@/services/dashboard-service";
+import { formatDateTime } from "@/lib/format-date";
 import type { DashboardSummary } from "@/types/dashboard";
-
-function formatLastExecution(value: string | null) {
-  if (!value) {
-    return "Sem execucao registrada";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(date);
-}
 
 type SummaryItem = {
   label: string;
@@ -110,7 +95,7 @@ export default function DashboardPage() {
       },
       {
         label: "Ultima execucao",
-        value: formatLastExecution(summary.lastRobotExecution),
+        value: formatDateTime(summary.lastRobotExecution),
         helper: "Referencia do robo de scraping",
         tone: "neutral",
         icon: Bot,

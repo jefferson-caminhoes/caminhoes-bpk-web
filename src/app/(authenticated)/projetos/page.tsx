@@ -12,21 +12,12 @@ import {
 } from "lucide-react";
 import { ErrorPanel, LoadingPanel } from "@/components/ui/feedback";
 import { appRoutes, projectDetailsRoute } from "@/lib/routes";
+import { formatDateTime } from "@/lib/format-date";
 import { listProjects } from "@/services/projects-service";
 import type { Project } from "@/types/project";
 
 type ViewMode = "lista" | "kanban";
 type ActiveFilter = "todos" | "ativos" | "inativos";
-
-function formatDate(value?: string | null) {
-  if (!value) return "Sem atualizacao";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(date);
-}
 
 function statusBadge(project: Project) {
   if (!project.active) {
@@ -265,7 +256,7 @@ export default function ProjetosPage() {
                     {project.protocolsCount ?? "-"}
                   </td>
                   <td className="px-4 py-3 text-slate-600">
-                    {formatDate(project.updatedAt)}
+                    {formatDateTime(project.updatedAt)}
                   </td>
                 </tr>
               ))}
@@ -318,7 +309,7 @@ export default function ProjetosPage() {
                     Ultima atualizacao
                   </dt>
                   <dd className="mt-1 text-slate-800">
-                    {formatDate(project.updatedAt)}
+                    {formatDateTime(project.updatedAt)}
                   </dd>
                 </div>
               </dl>

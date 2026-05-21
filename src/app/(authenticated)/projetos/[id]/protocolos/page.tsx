@@ -20,17 +20,11 @@ import {
 } from "@/lib/routes";
 import { listProjectProtocols } from "@/services/protocols-service";
 import { getProjectById } from "@/services/projects-service";
+import { formatDate } from "@/lib/format-date";
 import type { Protocol } from "@/types/protocol";
 import type { Project } from "@/types/project";
 
 type ViewMode = "lista" | "kanban";
-
-function formatDate(value?: string | null) {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(date);
-}
 
 function statusTone(value?: string | null) {
   if (!value) return "border-slate-200 bg-slate-100 text-slate-500";

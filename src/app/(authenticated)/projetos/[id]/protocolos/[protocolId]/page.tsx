@@ -16,6 +16,7 @@ import {
   updateProtocol,
 } from "@/services/protocols-service";
 import { projectProtocolsRoute } from "@/lib/routes";
+import { formatDateTime } from "@/lib/format-date";
 import type { Protocol } from "@/types/protocol";
 import type { Stakeholder } from "@/types/stakeholder";
 import type { User } from "@/types/user";
@@ -32,16 +33,6 @@ const protocolSchema = z.object({
 });
 
 type ProtocolFormData = z.infer<typeof protocolSchema>;
-
-function formatDate(value?: string | null) {
-  if (!value) return "Sem consulta registrada";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(date);
-}
 
 export default function ProtocoloDetalhePage() {
   const params = useParams<{ id: string; protocolId: string }>();
@@ -231,7 +222,7 @@ export default function ProtocoloDetalhePage() {
           </p>
         </div>
         <p className="text-xs text-zinc-600">
-          Ultima consulta: {formatDate(protocol?.lastConsultationAt)}
+          Ultima consulta: {formatDateTime(protocol?.lastConsultationAt)}
         </p>
       </div>
 
@@ -454,7 +445,7 @@ export default function ProtocoloDetalhePage() {
               <li key={`${log.id ?? "log"}-${index}`} className="rounded-md bg-zinc-50 p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-500">
                   <span>{log.user ?? "Usuario"}</span>
-                  <span>{formatDate(log.createdAt)}</span>
+                  <span>{formatDateTime(log.createdAt)}</span>
                 </div>
                 <p className="mt-2 text-sm text-zinc-800">
                   {log.message ?? "Alteracao registrada."}
