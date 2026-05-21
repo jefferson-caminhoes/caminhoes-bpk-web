@@ -1,4 +1,4 @@
-# Next.js Auth Starter
+# Caminhoes BPK Web
 
 ## Setup
 
@@ -12,10 +12,17 @@ npm run dev
 Create a `.env.local` file with:
 
 ```bash
-NEXT_PUBLIC_API_BASE_URL=YOUR_API_URL
+NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
-## Routes
+## Demo roteiro (frontend)
 
-- `/login`
-- `/dashboard` (protected by middleware)
+1. Fazer login.
+2. Importar planilha modelo.
+3. Abrir o dashboard.
+4. Criar projeto.
+5. Criar protocolo com CNPJ.
+6. Criar stakeholder cartorio com oficio/serventia.
+7. Consultar agora no detalhe do protocolo.
+8. Mostrar divergencia de status.
+9. Perguntar na Home IA sobre dados cadastrados.

@@ -19,6 +19,7 @@ const protocolSchema = z.object({
   manualStatus: z.string().optional(),
   situation: z.string().optional(),
   monitoringEnabled: z.boolean(),
+  isFinalized: z.boolean(),
 });
 
 type ProtocolFormData = z.infer<typeof protocolSchema>;
@@ -36,6 +37,8 @@ export default function NovoProtocoloPage() {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<ProtocolFormData>({
     resolver: zodResolver(protocolSchema),
@@ -48,8 +51,17 @@ export default function NovoProtocoloPage() {
       manualStatus: "",
       situation: "",
       monitoringEnabled: true,
+      isFinalized: false,
     },
   });
+
+  const isFinalized = watch("isFinalized");
+
+  useEffect(() => {
+    if (isFinalized) {
+      setValue("monitoringEnabled", false);
+    }
+  }, [isFinalized, setValue]);
 
   useEffect(() => {
     async function loadStakeholders() {
@@ -78,6 +90,11 @@ export default function NovoProtocoloPage() {
       setSubmitError(null);
       setIsSubmitting(true);
 
+      const monitoringEnabled = data.isFinalized ? false : data.monitoringEnabled;
+      const situation = data.isFinalized
+        ? data.situation?.trim() || "Finalizado"
+        : data.situation?.trim() || null;
+
       await createProtocol(projectId, {
         activity: data.activity,
         protocolNumber: data.protocolNumber,
@@ -85,8 +102,8 @@ export default function NovoProtocoloPage() {
         stakeholderId: data.stakeholderId,
         owner: data.owner?.trim() || null,
         manualStatus: data.manualStatus?.trim() || null,
-        situation: data.situation?.trim() || null,
-        monitoringEnabled: data.monitoringEnabled,
+        situation,
+        monitoringEnabled,
       });
 
       router.push(projectProtocolsRoute(projectId));
@@ -221,6 +238,15 @@ export default function NovoProtocoloPage() {
           <input type="checkbox" {...register("monitoringEnabled")} />
           Monitoramento ativo
         </label>
+        <label className="flex items-center gap-2 text-sm text-zinc-700">
+          <input type="checkbox" {...register("isFinalized")} />
+          Criar como finalizado
+        </label>
+        {isFinalized ? (
+          <p className="text-xs text-zinc-500">
+            Protocolos finalizados ficam com monitoramento desativado.
+          </p>
+        ) : null}
 
         {submitError ? (
           <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">

@@ -3,10 +3,33 @@ import type {
   CreateProtocolPayload,
   Protocol,
   ProtocolApiItem,
+  ProtocolChangeLog,
+  ProtocolChangeLogApi,
   UpdateProtocolPayload,
 } from "@/types/protocol";
 
+function normalizeChangeLogs(
+  raw: ProtocolChangeLogApi[] | undefined,
+): ProtocolChangeLog[] {
+  if (!raw) return [];
+
+  return raw.map((item) => ({
+    id: item.id ?? item._id ?? null,
+    createdAt: item.createdAt ?? item.created_at ?? item.date ?? null,
+    user: item.user ?? item.userName ?? item.author ?? null,
+    message: item.message ?? item.description ?? item.action ?? null,
+  }));
+}
+
 function normalizeProtocol(item: ProtocolApiItem): Protocol {
+  const changeLogs = normalizeChangeLogs(
+    item.changeLogs ??
+      item.auditLogs ??
+      item.logs ??
+      item.history ??
+      item.historico,
+  );
+
   return {
     id: item.id ?? item._id ?? "",
     projectId: item.projectId ?? item.project_id ?? "",
@@ -24,6 +47,7 @@ function normalizeProtocol(item: ProtocolApiItem): Protocol {
     lastConsultationAt:
       item.lastConsultationAt ?? item.last_consultation_at ?? null,
     owner: item.owner ?? item.responsavel ?? null,
+    changeLogs,
   };
 }
 

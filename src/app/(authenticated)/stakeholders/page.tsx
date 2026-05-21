@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { appRoutes, stakeholderDetailsRoute } from "@/lib/routes";
+import { getApiErrorMessage } from "@/lib/api-errors";
+import { ErrorPanel, LoadingPanel } from "@/components/ui/feedback";
 import { listStakeholders } from "@/services/stakeholders-service";
 import type { Stakeholder } from "@/types/stakeholder";
 
@@ -21,8 +23,10 @@ export default function StakeholdersPage() {
         setError(null);
         const data = await listStakeholders();
         setStakeholders(data);
-      } catch {
-        setError("Nao foi possivel carregar os stakeholders.");
+      } catch (error) {
+        setError(
+          getApiErrorMessage(error, "Nao foi possivel carregar os stakeholders."),
+        );
       } finally {
         setIsLoading(false);
       }
@@ -84,14 +88,10 @@ export default function StakeholdersPage() {
       </div>
 
       {isLoading ? (
-        <div className="mt-6 rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-600">
-          Carregando stakeholders...
-        </div>
+        <LoadingPanel message="Carregando stakeholders..." className="mt-6" />
       ) : null}
       {error ? (
-        <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {error}
-        </div>
+        <ErrorPanel message={error} className="mt-6" />
       ) : null}
       {!isLoading && !error && filtered.length === 0 ? (
         <div className="mt-6 rounded-lg border border-zinc-200 bg-white p-4 text-sm text-zinc-600">

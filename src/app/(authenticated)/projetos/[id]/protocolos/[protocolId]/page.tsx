@@ -256,6 +256,25 @@ export default function ProtocoloDetalhePage() {
         </div>
       ) : null}
 
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <article className="rounded-lg border border-zinc-200 bg-white p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            Status manual
+          </p>
+          <p className="mt-2 text-lg font-semibold text-zinc-900">
+            {protocol?.manualStatus ?? "Nao informado"}
+          </p>
+        </article>
+        <article className="rounded-lg border border-zinc-200 bg-white p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            Status externo
+          </p>
+          <p className="mt-2 text-lg font-semibold text-zinc-900">
+            {protocol?.externalStatus ?? "Nao informado"}
+          </p>
+        </article>
+      </div>
+
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="mt-6 max-w-3xl space-y-4 rounded-lg border border-zinc-200 bg-white p-5"
@@ -407,6 +426,29 @@ export default function ProtocoloDetalhePage() {
           </button>
         </div>
       </form>
+
+      <div className="mt-6 rounded-lg border border-zinc-200 bg-white p-5">
+        <h3 className="text-sm font-semibold text-zinc-900">Logs de alteracao</h3>
+        {protocol?.changeLogs && protocol.changeLogs.length > 0 ? (
+          <ul className="mt-3 space-y-2 text-sm text-zinc-700">
+            {protocol.changeLogs.map((log, index) => (
+              <li key={`${log.id ?? "log"}-${index}`} className="rounded-md bg-zinc-50 p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-500">
+                  <span>{log.user ?? "Usuario"}</span>
+                  <span>{formatDate(log.createdAt)}</span>
+                </div>
+                <p className="mt-2 text-sm text-zinc-800">
+                  {log.message ?? "Alteracao registrada."}
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-2 text-sm text-zinc-600">
+            Nenhum log de alteracao manual encontrado.
+          </p>
+        )}
+      </div>
     </section>
   );
 }

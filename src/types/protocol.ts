@@ -14,6 +14,14 @@ export type Protocol = {
   notFoundOnSource: boolean;
   lastConsultationAt?: string | null;
   owner?: string | null;
+  changeLogs?: ProtocolChangeLog[];
+};
+
+export type ProtocolChangeLog = {
+  id?: string | null;
+  createdAt?: string | null;
+  user?: string | null;
+  message?: string | null;
 };
 
 export type ProtocolApiItem = {
@@ -46,6 +54,25 @@ export type ProtocolApiItem = {
   last_consultation_at?: string | null;
   owner?: string | null;
   responsavel?: string | null;
+  changeLogs?: ProtocolChangeLogApi[];
+  auditLogs?: ProtocolChangeLogApi[];
+  logs?: ProtocolChangeLogApi[];
+  history?: ProtocolChangeLogApi[];
+  historico?: ProtocolChangeLogApi[];
+};
+
+export type ProtocolChangeLogApi = {
+  id?: string;
+  _id?: string;
+  createdAt?: string;
+  created_at?: string;
+  date?: string;
+  user?: string;
+  userName?: string;
+  author?: string;
+  message?: string;
+  description?: string;
+  action?: string;
 };
 
 export type CreateProtocolPayload = {
