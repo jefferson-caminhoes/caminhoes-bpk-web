@@ -12,6 +12,8 @@ export type Protocol = {
   situation?: string | null;
   monitoringEnabled: boolean;
   notFoundOnSource: boolean;
+  closedManually?: boolean;
+  closedAt?: string | null;
   lastConsultationAt?: string | null;
   owner?: string | null;
   openingDate?: string | null;
@@ -66,6 +68,8 @@ export type ProtocolApiItem = {
   notFoundOnSource?: boolean;
   not_found_on_source?: boolean;
   found_in_last_search?: boolean;
+  closed_manually?: boolean;
+  closed_at?: string | null;
   lastConsultationAt?: string | null;
   last_consultation_at?: string | null;
   last_consulted_at?: string | null;

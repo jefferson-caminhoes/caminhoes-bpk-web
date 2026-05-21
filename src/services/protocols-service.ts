@@ -48,6 +48,8 @@ function normalizeProtocol(item: ProtocolApiItem): Protocol {
       item.notFoundOnSource ??
       item.not_found_on_source ??
       (item.found_in_last_search !== undefined ? !item.found_in_last_search : false),
+    closedManually: item.closed_manually ?? undefined,
+    closedAt: item.closed_at ?? null,
     lastConsultationAt:
       item.last_consulted_at ?? item.lastConsultationAt ?? item.last_consultation_at ?? null,
     owner: item.owner ?? item.responsavel ?? null,

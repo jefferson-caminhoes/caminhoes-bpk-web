@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Bot, Link2, Send, UserRound } from "lucide-react";
+import { Bot, Link2, Send, Sparkles, UserRound } from "lucide-react";
 import { ErrorPanel } from "@/components/ui/feedback";
 import { getApiErrorMessage } from "@/lib/api-errors";
 import {
@@ -93,62 +93,54 @@ export default function HomePage() {
   const lastMessage = useMemo(() => messages[messages.length - 1], [messages]);
 
   return (
-    <section className="space-y-6">
-      <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#ee2331]">
-          Assistente operacional
-        </p>
-        <h2 className="mt-2 text-3xl font-semibold text-[#092946]">Home IA</h2>
-        <p className="mt-2 max-w-2xl text-sm text-slate-600">
-          Pergunte sobre projetos e protocolos. A IA responde com base nos dados
-          cadastrados.
-        </p>
-      </div>
-
-      {!hasMessages ? (
-        <div className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-[#092946] text-white">
-              <Bot size={20} />
+    <section className="min-h-[calc(100vh-120px)]">
+      <div className="mx-auto flex min-h-[calc(100vh-160px)] max-w-5xl flex-col">
+        <div className="flex-1 space-y-6 pt-4">
+          <div className="text-center">
+            <span className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#092946] text-white shadow-sm">
+              <Sparkles size={22} />
             </span>
-            <div>
-              <p className="text-sm font-semibold text-[#092946]">
-                Perguntas para gerar insight
-              </p>
-              <p className="text-sm text-slate-600">
-                Comece por riscos, prazos, divergencias e fontes problematicas.
-              </p>
-            </div>
+            <h2 className="mt-6 text-4xl font-semibold tracking-tight text-[#092946] sm:text-5xl">
+              Como posso ajudar hoje?
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-600">
+              Consulte projetos, protocolos, divergencias e fontes monitoradas
+              com base nos dados cadastrados no sistema.
+            </p>
           </div>
-          <div className="mt-4 grid gap-2 md:grid-cols-2">
+
+          {!hasMessages ? (
+            <div className="mx-auto grid w-full max-w-3xl gap-2 md:grid-cols-2">
             {suggestedQuestions.map((question) => (
               <button
                 key={question}
                 type="button"
                 onClick={() => handleSend(question)}
-                className="rounded-md border border-slate-200 bg-slate-50 px-3 py-3 text-left text-sm font-medium text-slate-700 transition hover:border-[#ee2331]/40 hover:bg-[#fff1f2] hover:text-[#092946]"
+                  className="min-h-20 rounded-2xl border border-slate-300 bg-white p-3 text-left text-xs font-semibold text-[#092946] shadow-sm transition hover:-translate-y-0.5 hover:border-[#ee2331]/50 hover:bg-[#fff1f2] hover:shadow-md sm:text-sm"
                 disabled={isSubmitting}
               >
+                  <span className="mb-2 inline-flex h-7 w-7 items-center justify-center rounded-xl bg-slate-100 text-[#092946]">
+                    <Bot size={14} />
+                  </span>
                 {question}
               </button>
             ))}
           </div>
-        </div>
-      ) : null}
+          ) : null}
 
-      <div className="space-y-4">
+          <div className="space-y-4">
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`rounded-md border p-4 text-sm shadow-sm ${
+                className={`rounded-2xl border p-4 text-sm shadow-sm ${
               message.role === "user"
-                ? "border-slate-200 bg-white text-slate-900"
-                : "border-[#092946]/15 bg-[#f8fafc] text-[#092946]"
+                    ? "ml-auto max-w-3xl border-slate-300 bg-white text-slate-900"
+                    : "max-w-4xl border-[#092946]/20 bg-[#f8fafc] text-[#092946]"
             }`}
           >
             <div className="flex items-center gap-2 font-semibold">
               <span
-                className={`inline-flex h-7 w-7 items-center justify-center rounded-md ${
+                    className={`inline-flex h-8 w-8 items-center justify-center rounded-xl ${
                   message.role === "user"
                     ? "bg-slate-100 text-slate-700"
                     : "bg-[#092946] text-white"
@@ -165,7 +157,7 @@ export default function HomePage() {
             <p className="mt-3 whitespace-pre-line leading-6">{message.content}</p>
 
             {message.sources && message.sources.length > 0 ? (
-              <div className="mt-4 rounded-md border border-slate-200 bg-white p-3">
+                  <div className="mt-4 rounded-2xl border border-slate-300 bg-white p-3">
                 <p className="text-xs font-semibold uppercase tracking-wide text-[#ee2331]">
                   Fontes consultadas
                 </p>
@@ -179,7 +171,7 @@ export default function HomePage() {
                         {href ? (
                           <Link
                             href={href}
-                            className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-2.5 py-1.5 font-medium text-[#092946] hover:border-[#ee2331]/40 hover:text-[#ee2331]"
+                                className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-2.5 py-1.5 font-medium text-[#092946] hover:border-[#ee2331]/40 hover:text-[#ee2331]"
                             target={href.startsWith("http") ? "_blank" : undefined}
                             rel={href.startsWith("http") ? "noreferrer" : undefined}
                           >
@@ -199,40 +191,48 @@ export default function HomePage() {
         ))}
 
         {isSubmitting && lastMessage?.role === "user" ? (
-          <div className="rounded-md border border-[#092946]/15 bg-white p-4 text-sm font-medium text-[#092946] shadow-sm">
+              <div className="rounded-2xl border border-[#092946]/20 bg-white p-4 text-sm font-medium text-[#092946] shadow-sm">
             <span className="inline-flex items-center gap-2">
               <span className="h-2 w-2 animate-pulse rounded-full bg-[#ee2331]" />
               A IA esta respondendo...
             </span>
           </div>
         ) : null}
-      </div>
+          </div>
 
-      {error ? <ErrorPanel message={error} /> : null}
+          {error ? <ErrorPanel message={error} /> : null}
+        </div>
 
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          void handleSend();
-        }}
-        className="sticky bottom-4 flex flex-col gap-3 rounded-md border border-slate-200 bg-white p-3 shadow-lg sm:flex-row"
-      >
-        <input
-          type="text"
-          value={input}
-          onChange={(event) => setInput(event.target.value)}
-          placeholder="Digite sua pergunta sobre projetos, protocolos ou riscos..."
-          className="min-h-11 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#ee2331]"
-        />
-        <button
-          type="submit"
-          disabled={!canSend}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[#092946] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#123a60] disabled:cursor-not-allowed disabled:opacity-60"
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            void handleSend();
+          }}
+          className={
+            hasMessages
+              ? "sticky bottom-4 mt-6 rounded-3xl border border-slate-300 bg-white p-2 shadow-xl shadow-slate-200/70"
+              : "mx-auto mt-2 w-full max-w-3xl rounded-3xl border border-slate-300 bg-white p-2 shadow-xl shadow-slate-200/70"
+          }
         >
-          <Send size={16} />
-          {isSubmitting ? "Enviando..." : "Perguntar"}
-        </button>
-      </form>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              type="text"
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              placeholder="Pergunte sobre projetos, protocolos ou riscos..."
+              className="min-h-14 w-full rounded-2xl border border-transparent bg-slate-50 px-4 py-3 text-sm focus:border-[#ee2331] focus:bg-white"
+            />
+            <button
+              type="submit"
+              disabled={!canSend}
+              className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-[#092946] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#123a60] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Send size={16} />
+              {isSubmitting ? "Enviando..." : "Enviar"}
+            </button>
+          </div>
+        </form>
+      </div>
     </section>
   );
 }

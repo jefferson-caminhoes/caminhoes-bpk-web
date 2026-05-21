@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FileSpreadsheet, UploadCloud } from "lucide-react";
+import { CheckCircle2, FileSpreadsheet, UploadCloud, XCircle } from "lucide-react";
 import { ErrorPanel, LoadingPanel } from "@/components/ui/feedback";
 import { getApiErrorMessage } from "@/lib/api-errors";
 import { pushToast } from "@/lib/toast";
@@ -82,9 +82,9 @@ export default function ImportarPlanilhaPage() {
         </p>
       </div>
 
-      <div className="rounded-md border border-[#092946]/15 bg-white p-4 shadow-sm">
+      <div className="rounded-2xl border border-[#092946]/20 bg-white p-5 shadow-sm">
         <div className="flex gap-3">
-          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#092946] text-white">
+          <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#092946] text-white shadow-sm">
             <FileSpreadsheet size={20} />
           </span>
           <div>
@@ -101,22 +101,33 @@ export default function ImportarPlanilhaPage() {
 
       <form
         onSubmit={handleSubmit}
-        className="max-w-2xl space-y-4 rounded-md border border-slate-200 bg-white p-5 shadow-sm"
+        className="max-w-3xl space-y-5 rounded-2xl border border-slate-300 bg-white p-5 shadow-sm"
       >
         <div>
           <label className="text-sm font-semibold text-[#092946]" htmlFor="file">
             Arquivo .xlsx
+          </label>
+          <label
+            htmlFor="file"
+            className="mt-2 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#092946]/30 bg-gradient-to-br from-slate-50 to-white px-5 py-8 text-center transition hover:border-[#ee2331]/60 hover:bg-[#fff1f2]"
+          >
+            <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#092946] text-white shadow-sm">
+              <UploadCloud size={22} />
+            </span>
+            <span className="mt-3 text-sm font-semibold text-[#092946]">
+              {file ? file.name : "Clique para escolher a planilha"}
+            </span>
+            <span className="mt-1 text-xs text-slate-500">
+              Apenas arquivos .xlsx do modelo oficial
+            </span>
           </label>
           <input
             id="file"
             type="file"
             accept=".xlsx"
             onChange={handleFileChange}
-            className="mt-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+            className="sr-only"
           />
-          <p className="mt-2 text-xs text-slate-500">
-            Formato aceito: .xlsx
-          </p>
         </div>
 
         {error ? <ErrorPanel message={error} /> : null}
@@ -124,7 +135,7 @@ export default function ImportarPlanilhaPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-[#092946] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#123a60] disabled:opacity-70"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#092946] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#123a60] disabled:opacity-70"
         >
           <UploadCloud size={16} />
           {isSubmitting ? "Importando..." : "Importar planilha"}
@@ -138,7 +149,7 @@ export default function ImportarPlanilhaPage() {
       {summary ? (
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-3">
-            <article className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+            <article className="rounded-2xl border border-slate-300 bg-white p-5 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Projetos criados
               </p>
@@ -146,7 +157,7 @@ export default function ImportarPlanilhaPage() {
                 {summary.projectsCreated}
               </p>
             </article>
-            <article className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+            <article className="rounded-2xl border border-slate-300 bg-white p-5 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Protocolos criados
               </p>
@@ -154,7 +165,7 @@ export default function ImportarPlanilhaPage() {
                 {summary.protocolsCreated}
               </p>
             </article>
-            <article className="rounded-md border border-[#ee2331]/30 bg-white p-4 shadow-sm">
+            <article className="rounded-2xl border border-[#ee2331]/40 bg-white p-5 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-wide text-[#ee2331]">
                 Linhas ignoradas
               </p>
@@ -165,13 +176,17 @@ export default function ImportarPlanilhaPage() {
           </div>
 
           {hasErrors ? (
-            <div className="rounded-md border border-red-200 bg-[#fff1f2] p-4">
-              <h3 className="text-sm font-semibold text-[#b5121f]">
+            <div className="rounded-2xl border border-red-300 bg-[#fff1f2] p-5 shadow-sm">
+              <h3 className="inline-flex items-center gap-2 text-sm font-semibold text-[#b5121f]">
+                <XCircle size={16} />
                 Erros encontrados
               </h3>
               <ul className="mt-3 space-y-2 text-sm text-[#b5121f]">
                 {summary.errors.map((item, index) => (
-                  <li key={`${item.message}-${index}`}>
+                  <li
+                    key={`${item.message}-${index}`}
+                    className="rounded-xl border border-red-200 bg-white px-3 py-2"
+                  >
                     {(item.line ?? item.row) ? `Linha ${item.line ?? item.row}: ` : ""}
                     {item.field ? `${item.field} - ` : ""}
                     {item.message}
@@ -179,7 +194,14 @@ export default function ImportarPlanilhaPage() {
                 ))}
               </ul>
             </div>
-          ) : null}
+          ) : (
+            <div className="rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700 shadow-sm">
+              <span className="inline-flex items-center gap-2">
+                <CheckCircle2 size={16} />
+                Importacao concluida sem erros de linha.
+              </span>
+            </div>
+          )}
         </div>
       ) : null}
     </section>
