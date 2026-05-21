@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { Bot, Link2, Send, UserRound } from "lucide-react";
 import { ErrorPanel } from "@/components/ui/feedback";
 import { getApiErrorMessage } from "@/lib/api-errors";
 import {
@@ -49,6 +50,7 @@ export default function HomePage() {
   const [input, setInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const messageIdRef = useRef(0);
 
   const canSend = input.trim().length > 0 && !isSubmitting;
 
@@ -58,8 +60,9 @@ export default function HomePage() {
 
     setError(null);
     setIsSubmitting(true);
+    messageIdRef.current += 1;
     const userMessage: ChatMessage = {
-      id: `${Date.now()}-user`,
+      id: `${messageIdRef.current}-user`,
       role: "user",
       content,
     };
@@ -69,8 +72,9 @@ export default function HomePage() {
 
     try {
       const response = await sendRagChat(content);
+      messageIdRef.current += 1;
       const assistantMessage: ChatMessage = {
-        id: `${Date.now()}-assistant`,
+        id: `${messageIdRef.current}-assistant`,
         role: "assistant",
         content: response.answer || "Sem resposta da IA.",
         sources: response.sources,
@@ -89,29 +93,40 @@ export default function HomePage() {
   const lastMessage = useMemo(() => messages[messages.length - 1], [messages]);
 
   return (
-    <section>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-semibold text-zinc-900">Home IA</h2>
-          <p className="mt-2 text-sm text-zinc-600">
-            Pergunte sobre projetos e protocolos. A IA responde com base nos dados
-            cadastrados.
-          </p>
-        </div>
+    <section className="space-y-6">
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#ee2331]">
+          Assistente operacional
+        </p>
+        <h2 className="mt-2 text-3xl font-semibold text-[#092946]">Home IA</h2>
+        <p className="mt-2 max-w-2xl text-sm text-slate-600">
+          Pergunte sobre projetos e protocolos. A IA responde com base nos dados
+          cadastrados.
+        </p>
       </div>
 
       {!hasMessages ? (
-        <div className="mt-6 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-          <p className="text-sm text-zinc-700">
-            Exemplos de perguntas para comecar:
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
+        <div className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-[#092946] text-white">
+              <Bot size={20} />
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-[#092946]">
+                Perguntas para gerar insight
+              </p>
+              <p className="text-sm text-slate-600">
+                Comece por riscos, prazos, divergencias e fontes problematicas.
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 grid gap-2 md:grid-cols-2">
             {suggestedQuestions.map((question) => (
               <button
                 key={question}
                 type="button"
                 onClick={() => handleSend(question)}
-                className="rounded-full border border-zinc-300 bg-white px-3 py-1 text-xs text-zinc-700 hover:border-zinc-400"
+                className="rounded-md border border-slate-200 bg-slate-50 px-3 py-3 text-left text-sm font-medium text-slate-700 transition hover:border-[#ee2331]/40 hover:bg-[#fff1f2] hover:text-[#092946]"
                 disabled={isSubmitting}
               >
                 {question}
@@ -121,27 +136,40 @@ export default function HomePage() {
         </div>
       ) : null}
 
-      <div className="mt-6 space-y-4">
+      <div className="space-y-4">
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`rounded-lg border p-4 text-sm ${
+            className={`rounded-md border p-4 text-sm shadow-sm ${
               message.role === "user"
-                ? "border-zinc-200 bg-zinc-50 text-zinc-900"
-                : "border-emerald-200 bg-emerald-50 text-emerald-900"
+                ? "border-slate-200 bg-white text-slate-900"
+                : "border-[#092946]/15 bg-[#f8fafc] text-[#092946]"
             }`}
           >
-            <p className="font-semibold">
+            <div className="flex items-center gap-2 font-semibold">
+              <span
+                className={`inline-flex h-7 w-7 items-center justify-center rounded-md ${
+                  message.role === "user"
+                    ? "bg-slate-100 text-slate-700"
+                    : "bg-[#092946] text-white"
+                }`}
+              >
+                {message.role === "user" ? (
+                  <UserRound size={15} />
+                ) : (
+                  <Bot size={15} />
+                )}
+              </span>
               {message.role === "user" ? "Voce" : "IA"}
-            </p>
-            <p className="mt-2 whitespace-pre-line text-sm">{message.content}</p>
+            </div>
+            <p className="mt-3 whitespace-pre-line leading-6">{message.content}</p>
 
             {message.sources && message.sources.length > 0 ? (
-              <div className="mt-3">
-                <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
-                  Fontes
+              <div className="mt-4 rounded-md border border-slate-200 bg-white p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#ee2331]">
+                  Fontes consultadas
                 </p>
-                <ul className="mt-2 space-y-1 text-sm">
+                <ul className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
                   {message.sources.map((source, index) => {
                     const href = buildSourceLink(source);
                     const label = getSourceLabel(source);
@@ -151,10 +179,11 @@ export default function HomePage() {
                         {href ? (
                           <Link
                             href={href}
-                            className="underline underline-offset-2"
+                            className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-2.5 py-1.5 font-medium text-[#092946] hover:border-[#ee2331]/40 hover:text-[#ee2331]"
                             target={href.startsWith("http") ? "_blank" : undefined}
                             rel={href.startsWith("http") ? "noreferrer" : undefined}
                           >
+                            <Link2 size={14} />
                             {label}
                           </Link>
                         ) : (
@@ -170,33 +199,37 @@ export default function HomePage() {
         ))}
 
         {isSubmitting && lastMessage?.role === "user" ? (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
-            A IA esta respondendo...
+          <div className="rounded-md border border-[#092946]/15 bg-white p-4 text-sm font-medium text-[#092946] shadow-sm">
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-[#ee2331]" />
+              A IA esta respondendo...
+            </span>
           </div>
         ) : null}
       </div>
 
-      {error ? <ErrorPanel message={error} className="mt-4" /> : null}
+      {error ? <ErrorPanel message={error} /> : null}
 
       <form
         onSubmit={(event) => {
           event.preventDefault();
           void handleSend();
         }}
-        className="mt-6 flex flex-col gap-3 rounded-lg border border-zinc-200 bg-white p-4 sm:flex-row"
+        className="sticky bottom-4 flex flex-col gap-3 rounded-md border border-slate-200 bg-white p-3 shadow-lg sm:flex-row"
       >
         <input
           type="text"
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          placeholder="Digite sua pergunta..."
-          className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+          placeholder="Digite sua pergunta sobre projetos, protocolos ou riscos..."
+          className="min-h-11 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#ee2331]"
         />
         <button
           type="submit"
           disabled={!canSend}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-70"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[#092946] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#123a60] disabled:cursor-not-allowed disabled:opacity-60"
         >
+          <Send size={16} />
           {isSubmitting ? "Enviando..." : "Perguntar"}
         </button>
       </form>

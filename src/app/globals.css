@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f5f6;
-  --foreground: #121417;
+  --background: #f7f9fb;
+  --foreground: #092946;
+  --brand-navy: #092946;
+  --brand-red: #ee2331;
+  --brand-red-dark: #c91422;
+  --brand-ink: #102033;
+  --brand-muted: #64748b;
+  --brand-line: #dde4ee;
+  --brand-soft: #f3f6fa;
+  --brand-red-soft: #fff1f2;
 }
 
 @theme inline {
@@ -16,4 +24,38 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), sans-serif;
+}
+
+::selection {
+  background: rgba(238, 35, 49, 0.16);
+  color: var(--brand-navy);
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  outline-color: var(--brand-red);
+}
+
+:focus-visible {
+  outline: 3px solid rgba(238, 35, 49, 0.32);
+  outline-offset: 2px;
+}
+
+input,
+select,
+textarea {
+  color: var(--brand-ink);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
 }

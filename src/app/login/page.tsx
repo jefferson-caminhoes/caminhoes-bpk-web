@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { LogIn } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -57,22 +58,25 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
-        <h1 className="text-2xl font-semibold text-zinc-900">Entrar</h1>
-        <p className="mt-2 text-sm text-zinc-500">
+    <div className="flex min-h-screen items-center justify-center bg-[#f7f9fb] px-4 py-10">
+      <div className="w-full max-w-md rounded-md border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/70">
+        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#ee2331]">
+          Caminhoes BPK
+        </p>
+        <h1 className="mt-2 text-3xl font-semibold text-[#092946]">Entrar</h1>
+        <p className="mt-2 text-sm text-slate-600">
           Use seu email e senha para acessar o dashboard.
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
           <div>
-            <label className="text-sm font-medium text-zinc-700" htmlFor="email">
+            <label className="text-sm font-semibold text-[#092946]" htmlFor="email">
               Email
             </label>
             <input
               id="email"
               type="email"
-              className="mt-2 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none"
+              className="mt-2 min-h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#ee2331]"
               placeholder="voce@email.com"
               {...register("email")}
             />
@@ -83,7 +87,7 @@ export default function LoginPage() {
 
           <div>
             <label
-              className="text-sm font-medium text-zinc-700"
+              className="text-sm font-semibold text-[#092946]"
               htmlFor="password"
             >
               Senha
@@ -91,7 +95,7 @@ export default function LoginPage() {
             <input
               id="password"
               type="password"
-              className="mt-2 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none"
+              className="mt-2 min-h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#ee2331]"
               placeholder="********"
               {...register("password")}
             />
@@ -101,16 +105,17 @@ export default function LoginPage() {
           </div>
 
           {submitError ? (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">
+            <p className="rounded-md border border-red-200 bg-[#fff1f2] px-3 py-2 text-xs font-medium text-[#b5121f]">
               {submitError}
             </p>
           ) : null}
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-[#092946] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#123a60] disabled:cursor-not-allowed disabled:opacity-70"
             disabled={isSubmitting}
           >
+            <LogIn size={16} />
             {isSubmitting ? "Entrando..." : "Entrar"}
           </button>
         </form>

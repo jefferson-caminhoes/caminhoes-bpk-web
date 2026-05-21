@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FileSpreadsheet, UploadCloud } from "lucide-react";
 import { ErrorPanel, LoadingPanel } from "@/components/ui/feedback";
 import { getApiErrorMessage } from "@/lib/api-errors";
 import { pushToast } from "@/lib/toast";
@@ -67,23 +68,43 @@ export default function ImportarPlanilhaPage() {
   const hasErrors = (summary?.errors ?? []).length > 0;
 
   return (
-    <section>
-      <h2 className="text-2xl font-semibold text-zinc-900">Importar planilha</h2>
-      <p className="mt-2 text-sm text-zinc-600">
-        Upload da planilha modelo para onboarding inicial do sistema.
-      </p>
+    <section className="space-y-6">
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#ee2331]">
+          Onboarding de dados
+        </p>
+        <h2 className="mt-2 text-3xl font-semibold text-[#092946]">
+          Importar planilha
+        </h2>
+        <p className="mt-2 max-w-2xl text-sm text-slate-600">
+          Carga inicial de projetos e protocolos a partir do modelo oficial do
+          sistema.
+        </p>
+      </div>
 
-      <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-        Esta planilha deve ser usada apenas para carga inicial. Certifique-se de
-        usar o modelo oficial.
+      <div className="rounded-md border border-[#092946]/15 bg-white p-4 shadow-sm">
+        <div className="flex gap-3">
+          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#092946] text-white">
+            <FileSpreadsheet size={20} />
+          </span>
+          <div>
+            <p className="text-sm font-semibold text-[#092946]">
+              Use apenas para carga inicial
+            </p>
+            <p className="mt-1 text-sm text-slate-600">
+              Verifique se o arquivo segue o modelo oficial antes de enviar para
+              evitar duplicidades ou linhas ignoradas.
+            </p>
+          </div>
+        </div>
       </div>
 
       <form
         onSubmit={handleSubmit}
-        className="mt-6 max-w-2xl space-y-4 rounded-lg border border-zinc-200 bg-white p-5"
+        className="max-w-2xl space-y-4 rounded-md border border-slate-200 bg-white p-5 shadow-sm"
       >
         <div>
-          <label className="text-sm font-medium text-zinc-700" htmlFor="file">
+          <label className="text-sm font-semibold text-[#092946]" htmlFor="file">
             Arquivo .xlsx
           </label>
           <input
@@ -91,9 +112,9 @@ export default function ImportarPlanilhaPage() {
             type="file"
             accept=".xlsx"
             onChange={handleFileChange}
-            className="mt-2 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
+            className="mt-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
           />
-          <p className="mt-2 text-xs text-zinc-500">
+          <p className="mt-2 text-xs text-slate-500">
             Formato aceito: .xlsx
           </p>
         </div>
@@ -103,51 +124,52 @@ export default function ImportarPlanilhaPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-70"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-[#092946] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#123a60] disabled:opacity-70"
         >
+          <UploadCloud size={16} />
           {isSubmitting ? "Importando..." : "Importar planilha"}
         </button>
       </form>
 
       {isSubmitting ? (
-        <LoadingPanel message="Processando importacao..." className="mt-6" />
+        <LoadingPanel message="Processando importacao..." />
       ) : null}
 
       {summary ? (
-        <div className="mt-6 space-y-4">
+        <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-3">
-            <article className="rounded-lg border border-zinc-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            <article className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Projetos criados
               </p>
-              <p className="mt-2 text-2xl font-semibold text-zinc-900">
+              <p className="mt-2 text-3xl font-semibold text-[#092946]">
                 {summary.projectsCreated}
               </p>
             </article>
-            <article className="rounded-lg border border-zinc-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            <article className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Protocolos criados
               </p>
-              <p className="mt-2 text-2xl font-semibold text-zinc-900">
+              <p className="mt-2 text-3xl font-semibold text-[#092946]">
                 {summary.protocolsCreated}
               </p>
             </article>
-            <article className="rounded-lg border border-zinc-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            <article className="rounded-md border border-[#ee2331]/30 bg-white p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#ee2331]">
                 Linhas ignoradas
               </p>
-              <p className="mt-2 text-2xl font-semibold text-zinc-900">
+              <p className="mt-2 text-3xl font-semibold text-[#ee2331]">
                 {summary.ignoredRows}
               </p>
             </article>
           </div>
 
           {hasErrors ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-              <h3 className="text-sm font-semibold text-red-800">
+            <div className="rounded-md border border-red-200 bg-[#fff1f2] p-4">
+              <h3 className="text-sm font-semibold text-[#b5121f]">
                 Erros encontrados
               </h3>
-              <ul className="mt-3 space-y-2 text-sm text-red-700">
+              <ul className="mt-3 space-y-2 text-sm text-[#b5121f]">
                 {summary.errors.map((item, index) => (
                   <li key={`${item.message}-${index}`}>
                     {(item.line ?? item.row) ? `Linha ${item.line ?? item.row}: ` : ""}

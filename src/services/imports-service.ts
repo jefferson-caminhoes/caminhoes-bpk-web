@@ -16,10 +16,13 @@ type ImportApiError = {
 type ImportApiResponse = {
   projectsCreated?: number;
   projetos_criados?: number;
+  projects?: number;
   protocolsCreated?: number;
   protocolos_criados?: number;
+  protocols?: number;
   ignoredRows?: number;
   linhas_ignoradas?: number;
+  ignored?: number;
   errors?: ImportApiError[] | string[];
   erros?: ImportApiError[] | string[];
 };
@@ -52,14 +55,14 @@ function normalizeErrors(
 
 function normalizeSummary(data: ImportApiResponse): ImportSummary {
   const projectsCreated =
-    data.projectsCreated ?? data.projetos_criados ?? (data as any).projects ?? 0;
+    data.projectsCreated ?? data.projetos_criados ?? data.projects ?? 0;
   const protocolsCreated =
     data.protocolsCreated ??
     data.protocolos_criados ??
-    (data as any).protocols ??
+    data.protocols ??
     0;
   const ignoredRows =
-    data.ignoredRows ?? data.linhas_ignoradas ?? (data as any).ignored ?? 0;
+    data.ignoredRows ?? data.linhas_ignoradas ?? data.ignored ?? 0;
 
   const errors = normalizeErrors(data.errors ?? data.erros);
 

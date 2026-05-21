@@ -4,6 +4,16 @@ import Link from "next/link";
 import { useMemo, useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import {
+  AlertTriangle,
+  Eye,
+  KanbanSquare,
+  LayoutList,
+  Plus,
+  Radar,
+  Search,
+} from "lucide-react";
+import { ErrorPanel, LoadingPanel } from "@/components/ui/feedback";
+import {
   projectProtocolDetailsRoute,
   projectProtocolsNewRoute,
   projectDetailsRoute,
@@ -14,6 +24,25 @@ import type { Protocol } from "@/types/protocol";
 import type { Project } from "@/types/project";
 
 type ViewMode = "lista" | "kanban";
+
+function formatDate(value?: string | null) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(date);
+}
+
+function statusTone(value?: string | null) {
+  if (!value) return "border-slate-200 bg-slate-100 text-slate-500";
+  const normalized = value.toLowerCase();
+  if (normalized.includes("final") || normalized.includes("conclu")) {
+    return "border-emerald-200 bg-emerald-50 text-emerald-700";
+  }
+  if (normalized.includes("pend") || normalized.includes("erro")) {
+    return "border-[#ee2331]/30 bg-[#fff1f2] text-[#ee2331]";
+  }
+  return "border-[#092946]/15 bg-slate-50 text-[#092946]";
+}
 
 export default function ProtocolosProjetoPage() {
   const params = useParams<{ id: string }>();
@@ -58,7 +87,8 @@ export default function ProtocolosProjetoPage() {
         normalizedQuery.length === 0 ||
         protocol.activity.toLowerCase().includes(normalizedQuery) ||
         protocol.protocolNumber.toLowerCase().includes(normalizedQuery) ||
-        protocol.cnpj.toLowerCase().includes(normalizedQuery);
+        protocol.cnpj.toLowerCase().includes(normalizedQuery) ||
+        (protocol.stakeholderName ?? "").toLowerCase().includes(normalizedQuery);
 
       const matchesDivergence = !showOnlyDivergent || protocol.hasDivergence;
       const matchesNotFound = !showOnlyNotFound || protocol.notFoundOnSource;
@@ -80,162 +110,263 @@ export default function ProtocolosProjetoPage() {
     showOnlyMonitoringEnabled,
   ]);
 
+  const stats = useMemo(() => {
+    return {
+      total: protocols.length,
+      divergent: protocols.filter((protocol) => protocol.hasDivergence).length,
+      notFound: protocols.filter((protocol) => protocol.notFoundOnSource).length,
+      monitored: protocols.filter((protocol) => protocol.monitoringEnabled).length,
+      withExternalStatus: protocols.filter((protocol) => protocol.externalStatus)
+        .length,
+    };
+  }, [protocols]);
+
   return (
-    <section>
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <section className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold text-zinc-900">Protocolos</h2>
-          <p className="mt-2 text-sm text-zinc-600">
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#ee2331]">
+            Monitoramento de protocolos
+          </p>
+          <h2 className="mt-2 text-3xl font-semibold text-[#092946]">Protocolos</h2>
+          <p className="mt-2 text-sm text-slate-600">
             Projeto:{" "}
-            <Link href={projectDetailsRoute(projectId)} className="font-medium underline">
+            <Link
+              href={projectDetailsRoute(projectId)}
+              className="font-semibold text-[#092946] hover:text-[#ee2331]"
+            >
               {project?.name ?? projectId}
             </Link>
           </p>
         </div>
         <Link
           href={projectProtocolsNewRoute(projectId)}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-semibold text-white"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-[#092946] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#123a60]"
         >
+          <Plus size={16} />
           Novo protocolo
         </Link>
       </div>
 
-      <div className="mt-6 grid gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 md:grid-cols-2 lg:grid-cols-4">
-        <input
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Buscar por atividade, numero ou CNPJ"
-          className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
-        />
-        <label className="flex items-center gap-2 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700">
-          <input
-            type="checkbox"
-            checked={showOnlyDivergent}
-            onChange={(event) => setShowOnlyDivergent(event.target.checked)}
-          />
-          Apenas divergencia
-        </label>
-        <label className="flex items-center gap-2 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700">
-          <input
-            type="checkbox"
-            checked={showOnlyNotFound}
-            onChange={(event) => setShowOnlyNotFound(event.target.checked)}
-          />
-          Apenas nao encontrados
-        </label>
-        <label className="flex items-center gap-2 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700">
-          <input
-            type="checkbox"
-            checked={showOnlyMonitoringEnabled}
-            onChange={(event) => setShowOnlyMonitoringEnabled(event.target.checked)}
-          />
-          Apenas monitoramento ativo
-        </label>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <article className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Total
+          </p>
+          <p className="mt-2 text-3xl font-semibold text-[#092946]">{stats.total}</p>
+        </article>
+        <article className="rounded-md border border-[#ee2331]/30 bg-white p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#ee2331]">
+            Divergentes
+          </p>
+          <p className="mt-2 text-3xl font-semibold text-[#ee2331]">
+            {stats.divergent}
+          </p>
+        </article>
+        <article className="rounded-md border border-[#ee2331]/30 bg-white p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#ee2331]">
+            Nao encontrados
+          </p>
+          <p className="mt-2 text-3xl font-semibold text-[#ee2331]">
+            {stats.notFound}
+          </p>
+        </article>
+        <article className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Monitorados
+          </p>
+          <p className="mt-2 text-3xl font-semibold text-[#092946]">
+            {stats.monitored}
+          </p>
+        </article>
+        <article className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Status externo
+          </p>
+          <p className="mt-2 text-3xl font-semibold text-[#092946]">
+            {stats.withExternalStatus}
+          </p>
+        </article>
       </div>
 
-      <div className="mt-4 flex w-fit rounded-md border border-zinc-300 bg-white p-1 text-sm">
-        <button
-          type="button"
-          onClick={() => setViewMode("lista")}
-          className={`rounded px-3 py-1.5 ${
-            viewMode === "lista" ? "bg-zinc-900 text-white" : "text-zinc-700"
-          }`}
-        >
-          Lista
-        </button>
-        <button
-          type="button"
-          onClick={() => setViewMode("kanban")}
-          className={`rounded px-3 py-1.5 ${
-            viewMode === "kanban" ? "bg-zinc-900 text-white" : "text-zinc-700"
-          }`}
-        >
-          Kanban
-        </button>
+      <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+          <label className="relative block">
+            <Search
+              size={17}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Buscar por atividade, numero, CNPJ ou stakeholder"
+              className="min-h-10 w-full rounded-md border border-slate-300 bg-white pl-9 pr-3 text-sm focus:border-[#ee2331]"
+            />
+          </label>
+
+          <div className="flex flex-wrap gap-2">
+            <label className="inline-flex min-h-10 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700">
+              <input
+                type="checkbox"
+                checked={showOnlyDivergent}
+                onChange={(event) => setShowOnlyDivergent(event.target.checked)}
+              />
+              Divergencia
+            </label>
+            <label className="inline-flex min-h-10 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700">
+              <input
+                type="checkbox"
+                checked={showOnlyNotFound}
+                onChange={(event) => setShowOnlyNotFound(event.target.checked)}
+              />
+              Nao encontrados
+            </label>
+            <label className="inline-flex min-h-10 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700">
+              <input
+                type="checkbox"
+                checked={showOnlyMonitoringEnabled}
+                onChange={(event) =>
+                  setShowOnlyMonitoringEnabled(event.target.checked)
+                }
+              />
+              Monitoramento ativo
+            </label>
+          </div>
+        </div>
+
+        <div className="mt-3 grid w-full max-w-xs grid-cols-2 rounded-md border border-slate-300 bg-slate-50 p-1 text-sm">
+          <button
+            type="button"
+            onClick={() => setViewMode("lista")}
+            className={`inline-flex items-center justify-center gap-2 rounded px-3 py-1.5 font-medium ${
+              viewMode === "lista"
+                ? "bg-[#092946] text-white"
+                : "text-slate-700 hover:text-[#092946]"
+            }`}
+          >
+            <LayoutList size={16} />
+            Lista
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("kanban")}
+            className={`inline-flex items-center justify-center gap-2 rounded px-3 py-1.5 font-medium ${
+              viewMode === "kanban"
+                ? "bg-[#092946] text-white"
+                : "text-slate-700 hover:text-[#092946]"
+            }`}
+          >
+            <KanbanSquare size={16} />
+            Kanban
+          </button>
+        </div>
       </div>
 
-      {isLoading ? (
-        <div className="mt-6 rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-600">
-          Carregando protocolos...
-        </div>
-      ) : null}
-      {error ? (
-        <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {error}
-        </div>
-      ) : null}
+      {isLoading ? <LoadingPanel message="Carregando protocolos..." /> : null}
+      {error ? <ErrorPanel message={error} /> : null}
       {!isLoading && !error && filteredProtocols.length === 0 ? (
-        <div className="mt-6 rounded-lg border border-zinc-200 bg-white p-4 text-sm text-zinc-600">
+        <div className="rounded-md border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm">
           Nenhum protocolo encontrado para os filtros selecionados.
         </div>
       ) : null}
 
       {!isLoading && !error && filteredProtocols.length > 0 && viewMode === "lista" ? (
-        <div className="mt-6 overflow-x-auto rounded-lg border border-zinc-200 bg-white">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-50 text-zinc-600">
+        <div className="overflow-x-auto rounded-md border border-slate-200 bg-white shadow-sm">
+          <table className="w-full min-w-[1180px] text-left text-sm">
+            <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
               <tr>
-                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Atividade</th>
-                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Protocolo</th>
-                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Atribuido</th>
-                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Status manual</th>
-                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Status externo</th>
-                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Divergencia</th>
-                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Situacao</th>
-                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Data Abertura</th>
-                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Ultima Obs.</th>
-                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Monit.</th>
+                <th className="px-4 py-3 font-semibold">Atividade</th>
+                <th className="px-4 py-3 font-semibold">Protocolo</th>
+                <th className="px-4 py-3 font-semibold">Responsavel</th>
+                <th className="px-4 py-3 font-semibold">Status manual</th>
+                <th className="px-4 py-3 font-semibold">Status externo</th>
+                <th className="px-4 py-3 font-semibold">Alertas</th>
+                <th className="px-4 py-3 font-semibold">Situacao</th>
+                <th className="px-4 py-3 font-semibold">Abertura</th>
+                <th className="px-4 py-3 font-semibold">Ultima obs.</th>
+                <th className="px-4 py-3 font-semibold">Monit.</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {filteredProtocols.map((protocol) => (
-                <tr key={protocol.id} className="border-t border-zinc-200 hover:bg-zinc-50 transition-colors">
-                  <td className="px-4 py-3">{protocol.activity}</td>
+                <tr key={protocol.id} className="hover:bg-slate-50">
+                  <td className="px-4 py-3 font-medium text-[#092946]">
+                    {protocol.activity}
+                    <p className="mt-1 text-xs font-normal text-slate-500">
+                      {protocol.stakeholderName ?? "Stakeholder nao informado"}
+                    </p>
+                  </td>
                   <td className="px-4 py-3">
                     <Link
                       href={projectProtocolDetailsRoute(projectId, protocol.id)}
-                      className="font-medium underline text-zinc-900"
+                      className="font-semibold text-[#092946] hover:text-[#ee2331]"
                     >
                       {protocol.protocolNumber}
                     </Link>
-                    <div className="text-[10px] text-zinc-400">{protocol.cnpj}</div>
+                    <div className="mt-1 text-xs text-slate-500">{protocol.cnpj}</div>
                   </td>
-                  <td className="px-4 py-3">{protocol.assignedTo ?? protocol.owner ?? "-"}</td>
+                  <td className="px-4 py-3 text-slate-700">
+                    {protocol.assignedTo ?? protocol.owner ?? "-"}
+                  </td>
                   <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700 font-medium text-[11px]">
+                    <span
+                      className={`inline-flex rounded-md border px-2 py-1 text-xs font-semibold ${statusTone(protocol.manualStatus)}`}
+                    >
                       {protocol.manualStatus ?? "N/A"}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-0.5 rounded-full font-medium text-[11px] ${
-                      protocol.externalStatus ? "bg-blue-50 text-blue-700" : "bg-zinc-100 text-zinc-500"
-                    }`}>
+                    <span
+                      className={`inline-flex rounded-md border px-2 py-1 text-xs font-semibold ${statusTone(protocol.externalStatus)}`}
+                    >
                       {protocol.externalStatus ?? "-"}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    {protocol.hasDivergence ? (
-                      <span className="text-red-600 font-semibold text-[11px] flex items-center gap-1">
-                        ⚠️ Sim
-                      </span>
-                    ) : (
-                      <span className="text-emerald-600 text-[11px]">Nao</span>
-                    )}
+                    <div className="flex flex-wrap gap-1.5">
+                      {protocol.hasDivergence ? (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-[#fff1f2] px-2 py-1 text-xs font-semibold text-[#ee2331]">
+                          <AlertTriangle size={13} />
+                          Divergencia
+                        </span>
+                      ) : null}
+                      {protocol.notFoundOnSource ? (
+                        <span className="rounded-md bg-[#fff1f2] px-2 py-1 text-xs font-semibold text-[#ee2331]">
+                          Nao encontrado
+                        </span>
+                      ) : null}
+                      {!protocol.hasDivergence && !protocol.notFoundOnSource ? (
+                        <span className="text-xs text-slate-500">Sem alertas</span>
+                      ) : null}
+                    </div>
                   </td>
-                  <td className="px-4 py-3 text-zinc-600 max-w-[150px] truncate" title={protocol.situation ?? ""}>
+                  <td
+                    className="max-w-[180px] truncate px-4 py-3 text-slate-600"
+                    title={protocol.situation ?? ""}
+                  >
                     {protocol.situation ?? "-"}
                   </td>
-                  <td className="px-4 py-3 text-zinc-500">
-                    {protocol.openingDate ? new Date(protocol.openingDate).toLocaleDateString('pt-BR') : "-"}
+                  <td className="px-4 py-3 text-slate-600">
+                    {formatDate(protocol.openingDate)}
                   </td>
-                  <td className="px-4 py-3 text-zinc-500 max-w-[200px] truncate" title={protocol.lastObservation ?? ""}>
+                  <td
+                    className="max-w-[220px] truncate px-4 py-3 text-slate-600"
+                    title={protocol.lastObservation ?? ""}
+                  >
                     {protocol.lastObservation ?? "-"}
                   </td>
-                  <td className="px-4 py-3 text-center">
-                    <span className={`h-2 w-2 rounded-full inline-block ${
-                      protocol.monitoringEnabled ? "bg-emerald-500" : "bg-zinc-300"
-                    }`} title={protocol.monitoringEnabled ? "Ativo" : "Inativo"} />
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-semibold ${
+                        protocol.monitoringEnabled
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                          : "border-slate-200 bg-slate-100 text-slate-500"
+                      }`}
+                    >
+                      <Radar size={13} />
+                      {protocol.monitoringEnabled ? "Ativo" : "Inativo"}
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -245,34 +376,68 @@ export default function ProtocolosProjetoPage() {
       ) : null}
 
       {!isLoading && !error && filteredProtocols.length > 0 && viewMode === "kanban" ? (
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredProtocols.map((protocol) => (
-            <article key={protocol.id} className="rounded-lg border border-zinc-200 bg-white p-4">
-              <h3 className="text-base font-semibold text-zinc-900">{protocol.activity}</h3>
-              <p className="mt-1 text-xs text-zinc-500">
+            <article
+              key={protocol.id}
+              className="rounded-md border border-slate-200 bg-white p-5 shadow-sm"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="text-base font-semibold text-[#092946]">
+                  {protocol.activity}
+                </h3>
                 <Link
                   href={projectProtocolDetailsRoute(projectId, protocol.id)}
-                  className="underline"
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-xs font-semibold text-[#092946] hover:border-[#ee2331]/40 hover:text-[#ee2331]"
                 >
-                  #{protocol.protocolNumber}
+                  <Eye size={13} />
+                  Ver
                 </Link>
+              </div>
+              <p className="mt-1 text-xs font-medium text-slate-500">
+                #{protocol.protocolNumber} - {protocol.cnpj}
               </p>
-              <dl className="mt-4 grid gap-1 text-sm text-zinc-700">
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {protocol.hasDivergence ? (
+                  <span className="rounded-md bg-[#fff1f2] px-2 py-1 text-xs font-semibold text-[#ee2331]">
+                    Divergencia
+                  </span>
+                ) : null}
+                {protocol.notFoundOnSource ? (
+                  <span className="rounded-md bg-[#fff1f2] px-2 py-1 text-xs font-semibold text-[#ee2331]">
+                    Nao encontrado
+                  </span>
+                ) : null}
+                <span
+                  className={`rounded-md px-2 py-1 text-xs font-semibold ${
+                    protocol.monitoringEnabled
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  {protocol.monitoringEnabled ? "Monitorado" : "Sem monitoramento"}
+                </span>
+              </div>
+
+              <dl className="mt-5 grid gap-3 text-sm">
                 <div className="flex justify-between gap-3">
-                  <dt>CNPJ</dt>
-                  <dd>{protocol.cnpj}</dd>
+                  <dt className="text-slate-500">Stakeholder</dt>
+                  <dd className="text-right font-medium text-slate-800">
+                    {protocol.stakeholderName ?? "-"}
+                  </dd>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <dt>Stakeholder</dt>
-                  <dd>{protocol.stakeholderName ?? "-"}</dd>
+                  <dt className="text-slate-500">Manual</dt>
+                  <dd className="text-right font-medium text-slate-800">
+                    {protocol.manualStatus ?? "N/A"}
+                  </dd>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <dt>Divergencia</dt>
-                  <dd>{protocol.hasDivergence ? "Sim" : "Nao"}</dd>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <dt>Nao encontrado</dt>
-                  <dd>{protocol.notFoundOnSource ? "Sim" : "Nao"}</dd>
+                  <dt className="text-slate-500">Externo</dt>
+                  <dd className="text-right font-medium text-slate-800">
+                    {protocol.externalStatus ?? "-"}
+                  </dd>
                 </div>
               </dl>
             </article>
