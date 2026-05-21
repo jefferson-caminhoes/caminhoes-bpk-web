@@ -16,7 +16,7 @@ function normalizeChangeLogs(
   return raw.map((item) => ({
     id: item.id ?? item._id ?? null,
     createdAt: item.createdAt ?? item.created_at ?? item.date ?? null,
-    user: item.user ?? item.userName ?? item.author ?? null,
+    user: item.changed_by ?? item.user ?? item.userName ?? item.author ?? null,
     message: item.message ?? item.description ?? item.action ?? null,
   }));
 }
@@ -24,6 +24,7 @@ function normalizeChangeLogs(
 function normalizeProtocol(item: ProtocolApiItem): Protocol {
   const changeLogs = normalizeChangeLogs(
     item.changeLogs ??
+      item.audit_logs ??
       item.auditLogs ??
       item.logs ??
       item.history ??

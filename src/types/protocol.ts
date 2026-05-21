@@ -78,6 +78,7 @@ export type ProtocolApiItem = {
   last_observation?: string | null;
   notes?: string | null;
   changeLogs?: ProtocolChangeLogApi[];
+  audit_logs?: ProtocolChangeLogApi[];
   auditLogs?: ProtocolChangeLogApi[];
   logs?: ProtocolChangeLogApi[];
   history?: ProtocolChangeLogApi[];
@@ -90,6 +91,7 @@ export type ProtocolChangeLogApi = {
   createdAt?: string;
   created_at?: string;
   date?: string;
+  changed_by?: string;
   user?: string;
   userName?: string;
   author?: string;
