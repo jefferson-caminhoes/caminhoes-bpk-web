@@ -9,6 +9,8 @@ export const appRoutes = {
   stakeholders: "/stakeholders",
   stakeholderNew: "/stakeholders/new",
   importSpreadsheet: "/importar-planilha",
+  usuarios: "/usuarios",
+  usuarioNew: "/usuarios/new",
 } as const;
 
 export function projectDetailsRoute(projectId: string) {
@@ -37,4 +39,5 @@ export const authenticatedNavItems: NavItem[] = [
   { label: "Projetos", href: appRoutes.projects },
   { label: "Stakeholders", href: appRoutes.stakeholders },
   { label: "Importacao", href: appRoutes.importSpreadsheet },
+  { label: "Usuarios", href: appRoutes.usuarios },
 ];

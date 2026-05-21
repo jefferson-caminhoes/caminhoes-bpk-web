@@ -9,6 +9,7 @@ import {
   FolderKanban,
   LogOut,
   UploadCloud,
+  UserCog,
   Users,
 } from "lucide-react";
 import { appRoutes, authenticatedNavItems } from "@/lib/routes";
@@ -25,6 +26,7 @@ const navIcons: Record<string, ComponentType<{ size?: number; strokeWidth?: numb
   [appRoutes.projects]: FolderKanban,
   [appRoutes.stakeholders]: Users,
   [appRoutes.importSpreadsheet]: UploadCloud,
+  [appRoutes.usuarios]: UserCog,
 };
 
 export function AppShell({ children }: AppShellProps) {
