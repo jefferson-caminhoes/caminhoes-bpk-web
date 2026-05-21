@@ -12,6 +12,7 @@ import {
   getStakeholderById,
   updateStakeholder,
 } from "@/services/stakeholders-service";
+import api from "@/lib/api";
 
 const stakeholderSchema = z
   .object({
@@ -65,6 +66,52 @@ export default function StakeholderDetalhePage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // AI URL Analyzer state
+  const [analyzeUrl, setAnalyzeUrl] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analyzeResult, setAnalyzeResult] = useState<{status: string; portalType?: string; confidence?: number; steps?: number; analyzedAt?: string; error?: string} | null>(null);
+
+  const handleAnalyzeUrl = async () => {
+    if (!analyzeUrl.trim()) return;
+    setIsAnalyzing(true);
+    setAnalyzeResult(null);
+    try {
+      await api.post(`/stakeholders/${stakeholderId}/analyze-url`, { url: analyzeUrl.trim() });
+      setAnalyzeResult({ status: "queued" });
+      // Poll probe status
+      let attempts = 0;
+      const poll = setInterval(async () => {
+        attempts++;
+        try {
+          const { data } = await api.get(`/stakeholders/${stakeholderId}/probe`);
+          if (data.status === "analyzed" && data.site_probe) {
+            clearInterval(poll);
+            setIsAnalyzing(false);
+            setAnalyzeResult({
+              status: "analyzed",
+              portalType: data.site_probe.portal_type,
+              confidence: data.site_probe.confidence,
+              steps: data.site_probe.steps?.length ?? 0,
+              analyzedAt: data.site_probe.analyzed_at,
+            });
+            pushToast("Análise concluída com sucesso!", "success");
+          } else if (data.status === "error") {
+            clearInterval(poll);
+            setIsAnalyzing(false);
+            setAnalyzeResult({ status: "error", error: data.error ?? "Erro ao analisar URL" });
+          } else if (attempts >= 30) {
+            clearInterval(poll);
+            setIsAnalyzing(false);
+            setAnalyzeResult({ status: "timeout", error: "Análise em andamento (pode levar alguns minutos)" });
+          }
+        } catch { /* keep polling */ }
+      }, 5000);
+    } catch (error) {
+      setIsAnalyzing(false);
+      setAnalyzeResult({ status: "error", error: getApiErrorMessage(error, "Erro ao enfileirar análise") });
+    }
+  };
 
   const {
     register,
@@ -344,6 +391,65 @@ export default function StakeholderDetalhePage() {
           {isSubmitting ? "Salvando..." : "Salvar alteracoes"}
         </button>
       </form>
+
+      {/* AI URL Analyzer */}
+      <div className="mt-8 max-w-2xl rounded-lg border border-blue-200 bg-blue-50 p-5">
+        <h3 className="text-base font-semibold text-blue-900">
+          🤖 Analisar URL com IA
+        </h3>
+        <p className="mt-1 text-xs text-blue-700">
+          Informe a URL do portal e a IA criará automaticamente a receita de scraping.
+        </p>
+        <div className="mt-3 flex gap-2">
+          <input
+            type="url"
+            value={analyzeUrl}
+            onChange={(e) => setAnalyzeUrl(e.target.value)}
+            placeholder="https://portal.exemplo.gov.br/consulta"
+            className="flex-1 rounded-md border border-blue-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <button
+            type="button"
+            onClick={() => void handleAnalyzeUrl()}
+            disabled={isAnalyzing || !analyzeUrl.trim()}
+            className="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 hover:bg-blue-800"
+          >
+            {isAnalyzing ? "Analisando..." : "Analisar"}
+          </button>
+        </div>
+
+        {isAnalyzing && (
+          <div className="mt-3 flex items-center gap-2 text-sm text-blue-700">
+            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            </svg>
+            IA analisando o portal... (pode levar até 60s)
+          </div>
+        )}
+
+        {analyzeResult && analyzeResult.status === "analyzed" && (
+          <div className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-3">
+            <p className="text-sm font-semibold text-emerald-800">✅ Scraping configurado automaticamente!</p>
+            <div className="mt-2 grid grid-cols-2 gap-1 text-xs text-emerald-700">
+              <span>Tipo de portal: <strong>{analyzeResult.portalType}</strong></span>
+              <span>Confiança: <strong>{((analyzeResult.confidence ?? 0) * 100).toFixed(0)}%</strong></span>
+              <span>Passos gerados: <strong>{analyzeResult.steps}</strong></span>
+              <span>Analisado em: <strong>{analyzeResult.analyzedAt ? new Date(analyzeResult.analyzedAt).toLocaleString("pt-BR") : "-"}</strong></span>
+            </div>
+          </div>
+        )}
+
+        {analyzeResult && (analyzeResult.status === "error" || analyzeResult.status === "timeout") && (
+          <p className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+            {analyzeResult.status === "timeout" ? "⏳" : "⚠️"} {analyzeResult.error}
+          </p>
+        )}
+
+        {analyzeResult && analyzeResult.status === "queued" && !isAnalyzing && (
+          <p className="mt-3 text-xs text-blue-600">Análise enfileirada. Aguardando resultado...</p>
+        )}
+      </div>
     </section>
   );
 }

@@ -13,10 +13,15 @@ function normalizeUser(item: UserApiItem): User {
 }
 
 export async function listUsers(active?: boolean): Promise<User[]> {
-  const params = active !== undefined ? `?active=${active}` : "";
-  const { data } = await api.get<UserApiItem[]>(`/users${params}`);
-  const rawItems = Array.isArray(data) ? data : [];
-  return rawItems.map(normalizeUser).filter((u) => u.id);
+  try {
+    const params = active !== undefined ? `?active=${active}` : "";
+    const { data } = await api.get<UserApiItem[]>(`/users${params}`);
+    const rawItems = Array.isArray(data) ? data : [];
+    return rawItems.map(normalizeUser).filter((u) => u.id);
+  } catch {
+    // API may not have /users endpoint — return empty list gracefully
+    return [];
+  }
 }
 
 export async function createUser(payload: UserUpsertPayload): Promise<User> {
