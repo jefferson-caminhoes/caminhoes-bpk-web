@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   AlertTriangle,
   Eye,
@@ -39,6 +39,7 @@ function statusTone(value?: string | null) {
 }
 
 export default function ProtocolosProjetoPage() {
+  const router = useRouter();
   const params = useParams<{ id: string }>();
   const projectId = params.id;
 
@@ -284,7 +285,7 @@ export default function ProtocolosProjetoPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredProtocols.map((protocol) => (
-                <tr key={protocol.id} className="hover:bg-slate-50">
+                <tr key={protocol.id} className="cursor-pointer hover:bg-slate-50" onClick={() => router.push(projectProtocolDetailsRoute(projectId, protocol.id))}>
                   <td className="px-4 py-3 font-medium text-[#092946]">
                     {protocol.activity}
                     <p className="mt-1 text-xs font-normal text-slate-500">

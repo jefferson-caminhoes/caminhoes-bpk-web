@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
@@ -30,6 +31,7 @@ function statusBadge(project: Project) {
 }
 
 export default function ProjetosPage() {
+  const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -207,7 +209,7 @@ export default function ProjetosPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredProjects.map((project) => (
-                <tr key={project.id} className="hover:bg-slate-50">
+                <tr key={project.id} className="cursor-pointer hover:bg-slate-50" onClick={() => router.push(projectDetailsRoute(project.id))}>
                   <td className="px-4 py-3 font-semibold text-[#092946]">
                     <Link
                       href={projectDetailsRoute(project.id)}

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, CheckCircle2, Plus, Search } from "lucide-react";
 import { appRoutes, stakeholderDetailsRoute } from "@/lib/routes";
@@ -10,6 +11,7 @@ import { listStakeholders } from "@/services/stakeholders-service";
 import type { Stakeholder } from "@/types/stakeholder";
 
 export default function StakeholdersPage() {
+  const router = useRouter();
   const [stakeholders, setStakeholders] = useState<Stakeholder[]>([]);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"todos" | "ativos" | "inativos">(
@@ -163,7 +165,7 @@ export default function StakeholdersPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filtered.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50">
+                <tr key={item.id} className="cursor-pointer hover:bg-slate-50" onClick={() => router.push(stakeholderDetailsRoute(item.id))}>
                   <td className="px-4 py-3 font-semibold text-[#092946]">
                     <Link
                       href={stakeholderDetailsRoute(item.id)}
