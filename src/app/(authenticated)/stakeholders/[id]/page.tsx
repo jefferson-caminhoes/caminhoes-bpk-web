@@ -18,10 +18,13 @@ const stakeholderSchema = z
     name: z.string().min(1, "Nome e obrigatorio."),
     type: z.string().optional(),
     baseUrl: z.string().url("Informe uma URL valida.").optional().or(z.literal("")),
-    queryTemplate: z.string().optional(),
     requiresJavascript: z.boolean(),
     hasCaptcha: z.boolean(),
     requiresOffice: z.boolean(),
+    useCredentials: z.boolean(),
+    login: z.string().optional(),
+    password: z.string().optional(),
+    hasExistingCredentials: z.boolean(),
     notes: z.string().optional(),
     active: z.boolean(),
   })
@@ -32,6 +35,22 @@ const stakeholderSchema = z
         message: "Para cartorio, marque exige oficio/serventia.",
         path: ["requiresOffice"],
       });
+    }
+    if (data.useCredentials) {
+      if (!data.login?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Informe o login.",
+          path: ["login"],
+        });
+      }
+      if (!data.password?.trim() && !data.hasExistingCredentials) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Informe a senha.",
+          path: ["password"],
+        });
+      }
     }
   });
 
@@ -59,10 +78,13 @@ export default function StakeholderDetalhePage() {
       name: "",
       type: "",
       baseUrl: "",
-      queryTemplate: "",
       requiresJavascript: false,
       hasCaptcha: false,
       requiresOffice: false,
+      useCredentials: false,
+      login: "",
+      password: "",
+      hasExistingCredentials: false,
       notes: "",
       active: true,
     },
@@ -83,10 +105,13 @@ export default function StakeholderDetalhePage() {
           name: data.name,
           type: data.type ?? "",
           baseUrl: data.baseUrl ?? "",
-          queryTemplate: data.queryTemplate ?? "",
           requiresJavascript: data.requiresJavascript,
           hasCaptcha: data.hasCaptcha,
           requiresOffice: data.requiresOffice,
+          useCredentials: data.requiresAuthentication || data.hasCredentials,
+          login: data.authUsername ?? "",
+          password: "",
+          hasExistingCredentials: data.hasCredentials,
           notes: data.notes ?? "",
           active: data.active,
         });
@@ -115,10 +140,12 @@ export default function StakeholderDetalhePage() {
         name: data.name,
         type: data.type?.trim() || null,
         baseUrl: data.baseUrl?.trim() || null,
-        queryTemplate: data.queryTemplate?.trim() || null,
         requiresJavascript: data.requiresJavascript,
         hasCaptcha: data.hasCaptcha,
         requiresOffice: isCartorioType ? data.requiresOffice : false,
+        useCredentials: data.useCredentials,
+        login: data.login?.trim() || null,
+        password: data.password?.trim() || null,
         notes: data.notes?.trim() || null,
         active: data.active,
       });
@@ -213,21 +240,6 @@ export default function StakeholderDetalhePage() {
           ) : null}
         </div>
 
-        <div>
-          <label
-            className="text-sm font-medium text-zinc-700"
-            htmlFor="queryTemplate"
-          >
-            Template de consulta
-          </label>
-          <input
-            id="queryTemplate"
-            type="text"
-            {...register("queryTemplate")}
-            className="mt-2 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
-        </div>
-
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="flex items-center gap-2 text-sm text-zinc-700">
             <input type="checkbox" {...register("requiresJavascript")} />
@@ -249,6 +261,51 @@ export default function StakeholderDetalhePage() {
           <p className="text-xs text-red-600">{errors.requiresOffice.message}</p>
         ) : null}
 
+        <div className="rounded-md border border-zinc-200 bg-zinc-50 p-4">
+          <label className="flex items-center gap-2 text-sm font-medium text-zinc-700">
+            <input type="checkbox" {...register("useCredentials")} />
+            Usar login e senha para este stakeholder
+          </label>
+          <p className="mt-2 text-xs text-zinc-500">
+            Opcional. Se a senha ficar vazia e ja existir uma salva, a senha atual sera mantida.
+          </p>
+
+          {watch("useCredentials") ? (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="text-sm font-medium text-zinc-700" htmlFor="login">
+                  Login
+                </label>
+                <input
+                  id="login"
+                  type="text"
+                  {...register("login")}
+                  className="mt-2 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+                />
+                {errors.login ? (
+                  <p className="mt-1 text-xs text-red-600">{errors.login.message}</p>
+                ) : null}
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-zinc-700" htmlFor="password">
+                  Senha
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  placeholder={watch("hasExistingCredentials") ? "Deixe em branco para manter" : ""}
+                  {...register("password")}
+                  className="mt-2 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+                />
+                {errors.password ? (
+                  <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+        </div>
+
         <div>
           <label className="text-sm font-medium text-zinc-700" htmlFor="notes">
             Observacoes
@@ -265,6 +322,7 @@ export default function StakeholderDetalhePage() {
           <input type="checkbox" {...register("active")} />
           Stakeholder ativo
         </label>
+        <input type="hidden" {...register("hasExistingCredentials")} />
 
         {submitError ? (
           <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">

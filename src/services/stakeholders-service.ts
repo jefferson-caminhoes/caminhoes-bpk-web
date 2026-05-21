@@ -16,20 +16,37 @@ function normalizeStakeholder(item: StakeholderApiItem): Stakeholder {
       item.requiresJavascript ?? item.requires_javascript ?? item.requer_javascript ?? false,
     hasCaptcha: item.hasCaptcha ?? item.has_captcha ?? item.tem_captcha ?? false,
     requiresOffice: item.requiresOffice ?? item.requires_oficio ?? item.exige_oficio ?? false,
+    requiresAuthentication:
+      item.requiresAuthentication ?? item.requires_authentication ?? false,
+    authUsername: item.authUsername ?? item.auth_username ?? null,
+    loginUrl: item.loginUrl ?? item.login_url ?? null,
+    hasCredentials: item.hasCredentials ?? item.has_credentials ?? false,
     notes: item.notes ?? item.observacoes ?? null,
     active: item.active ?? item.ativo ?? true,
   };
 }
 
 function toApiPayload(payload: StakeholderUpsertPayload) {
+  const shouldSendCredentials = payload.useCredentials && payload.login?.trim();
+
   return {
     name: payload.name,
     type: payload.type ?? "other",
     base_url: payload.baseUrl ?? "",
-    query_url_template: payload.queryTemplate ?? null,
     requires_javascript: payload.requiresJavascript,
     has_captcha: payload.hasCaptcha,
     requires_oficio: payload.requiresOffice,
+    requires_authentication: Boolean(shouldSendCredentials),
+    auth: shouldSendCredentials
+      ? {
+          type: "form_login",
+          login_url: payload.baseUrl?.trim() || null,
+          username: payload.login?.trim() || null,
+          ...(payload.password?.trim()
+            ? { password: payload.password.trim() }
+            : {}),
+        }
+      : null,
     notes: payload.notes ?? null,
     active: payload.active,
   };

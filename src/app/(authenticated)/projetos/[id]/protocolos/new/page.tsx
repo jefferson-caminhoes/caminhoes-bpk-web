@@ -7,8 +7,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { createProtocol } from "@/services/protocols-service";
 import { listStakeholders } from "@/services/stakeholders-service";
+import { listUsers } from "@/services/users-service";
 import { projectProtocolsRoute } from "@/lib/routes";
 import type { Stakeholder } from "@/types/stakeholder";
+import type { User } from "@/types/user";
 
 const protocolSchema = z.object({
   activity: z.string().min(1, "Atividade e obrigatoria."),
@@ -30,6 +32,7 @@ export default function NovoProtocoloPage() {
   const router = useRouter();
 
   const [stakeholders, setStakeholders] = useState<Stakeholder[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [isLoadingStakeholders, setIsLoadingStakeholders] = useState(true);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -64,16 +67,20 @@ export default function NovoProtocoloPage() {
   }, [isFinalized, setValue]);
 
   useEffect(() => {
-    async function loadStakeholders() {
+    async function loadDependencies() {
       try {
-        const data = await listStakeholders();
-        setStakeholders(data.filter((item) => item.active));
+        const [stakeholdersData, usersData] = await Promise.all([
+          listStakeholders(),
+          listUsers(true),
+        ]);
+        setStakeholders(stakeholdersData.filter((item) => item.active));
+        setUsers(usersData);
       } finally {
         setIsLoadingStakeholders(false);
       }
     }
 
-    void loadStakeholders();
+    void loadDependencies();
   }, []);
 
   const stakeholderOptions = useMemo(
@@ -203,12 +210,18 @@ export default function NovoProtocoloPage() {
             <label className="text-sm font-medium text-zinc-700" htmlFor="owner">
               Responsavel
             </label>
-            <input
+            <select
               id="owner"
-              type="text"
               {...register("owner")}
-              className="mt-2 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-            />
+              className="mt-2 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
+            >
+              <option value="">Sem responsavel</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="text-sm font-medium text-zinc-700" htmlFor="manualStatus">

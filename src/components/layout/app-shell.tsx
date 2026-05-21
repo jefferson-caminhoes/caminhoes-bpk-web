@@ -12,6 +12,7 @@ import {
   UserCog,
   Users,
 } from "lucide-react";
+import { BrandLogo } from "@/components/ui/brand-logo";
 import { appRoutes, authenticatedNavItems } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -37,19 +38,11 @@ export function AppShell({ children }: AppShellProps) {
     authenticatedNavItems[0];
 
   return (
-    <div className="min-h-screen bg-[#f7f9fb] text-[#092946]">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="flex min-h-screen">
         <aside className="sticky top-0 hidden h-screen w-72 shrink-0 border-r border-slate-200 bg-white px-5 py-6 md:flex md:flex-col">
           <Link href={appRoutes.dashboard} className="group block">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[#ee2331]">
-              Caminhoes BPK
-            </span>
-            <span className="mt-2 block text-xl font-semibold text-[#092946]">
-              Monitoramento
-            </span>
-            <span className="mt-1 block text-sm text-slate-500">
-              Projetos, protocolos e scraping
-            </span>
+            <BrandLogo size="sm" />
           </Link>
 
           <nav className="mt-8 space-y-1" aria-label="Navegacao principal">
@@ -64,8 +57,8 @@ export function AppShell({ children }: AppShellProps) {
                   className={cn(
                     "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-[#092946] text-white shadow-sm"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-[#092946]",
+                      ? "bg-brand-navy text-white shadow-sm"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-brand-navy",
                   )}
                 >
                   <Icon size={18} strokeWidth={1.9} />
@@ -87,7 +80,7 @@ export function AppShell({ children }: AppShellProps) {
           <button
             type="button"
             onClick={logout}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-[#092946] transition hover:border-[#ee2331] hover:text-[#ee2331]"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-brand-navy transition hover:border-brand-red hover:text-brand-red"
           >
             <LogOut size={16} />
             Sair
@@ -97,10 +90,8 @@ export function AppShell({ children }: AppShellProps) {
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6">
             <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#ee2331] md:hidden">
-                  Caminhoes BPK
-                </p>
+              <div className="flex min-w-0 items-center gap-3">
+                <BrandLogo size="sm" className="md:hidden" />
                 <h1 className="text-lg font-semibold text-[#092946]">
                   {currentItem.label}
                 </h1>
@@ -108,7 +99,7 @@ export function AppShell({ children }: AppShellProps) {
               <button
                 type="button"
                 onClick={logout}
-                className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-[#092946] transition hover:border-[#ee2331] hover:text-[#ee2331] md:hidden"
+                className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-brand-navy transition hover:border-brand-red hover:text-brand-red md:hidden"
               >
                 <LogOut size={16} />
                 Sair
@@ -129,7 +120,7 @@ export function AppShell({ children }: AppShellProps) {
                     className={cn(
                       "inline-flex shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium",
                       isActive
-                        ? "border-[#092946] bg-[#092946] text-white"
+                        ? "border-brand-navy bg-brand-navy text-white"
                         : "border-slate-200 bg-white text-slate-700",
                     )}
                   >
