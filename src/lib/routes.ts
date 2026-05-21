@@ -38,6 +38,6 @@ export const authenticatedNavItems: NavItem[] = [
   { label: "Dashboard", href: appRoutes.dashboard },
   { label: "Projetos", href: appRoutes.projects },
   { label: "Stakeholders", href: appRoutes.stakeholders },
-  { label: "Importacao", href: appRoutes.importSpreadsheet },
+  { label: "Importação", href: appRoutes.importSpreadsheet },
   { label: "Usuarios", href: appRoutes.usuarios },
 ];

@@ -107,15 +107,15 @@ export default function DashboardPage() {
   const insight = useMemo(() => {
     if (!summary) return null;
     if (summary.divergentProtocols > 0) {
-      return "Revise primeiro os protocolos com divergencia entre status manual e externo.";
+      return "Revise primeiro os protocolos com divergência entre status manual e externo.";
     }
     if (summary.notFoundProtocols > 0) {
-      return "Audite as fontes dos protocolos nao encontrados na ultima consulta.";
+      return "Audite as fontes dos protocolos não encontrados na última consulta.";
     }
     if (summary.monitoredProtocols === 0) {
-      return "Ative o monitoramento dos protocolos prioritarios para gerar alertas.";
+      return "Ative o monitoramento dos protocolos prioritários para gerar alertas.";
     }
-    return "Operacao sem riscos criticos detectados no resumo atual.";
+    return "Operação sem riscos críticos detectados no resumo atual.";
   }, [summary]);
 
   return (
@@ -127,8 +127,8 @@ export default function DashboardPage() {
           </p>
           <h2 className="mt-2 text-3xl font-semibold text-[#092946]">Dashboard</h2>
           <p className="mt-2 max-w-2xl text-sm text-slate-600">
-            Visao executiva da carteira, com destaque para protocolos que exigem
-            decisao ou revisao operacional.
+            Visão executiva da carteira, com destaque para protocolos que exigem
+            decisão ou revisão operacional.
           </p>
         </div>
       </div>

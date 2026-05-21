@@ -143,7 +143,7 @@ export default function ImportarPlanilhaPage() {
       </form>
 
       {isSubmitting ? (
-        <LoadingPanel message="Processando importacao..." />
+        <LoadingPanel message="Processando importação..." />
       ) : null}
 
     </section>

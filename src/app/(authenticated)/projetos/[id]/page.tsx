@@ -158,7 +158,7 @@ export default function ProjetoDetalhePage() {
             {project?.name ?? "Detalhe do projeto"}
           </h2>
           <p className="mt-2 max-w-2xl text-sm text-slate-600">
-            Visao operacional do projeto, status da carteira e acesso aos
+            Visão operacional do projeto, status da carteira e acesso aos
             protocolos monitorados.
           </p>
         </div>
@@ -205,7 +205,7 @@ export default function ProjetoDetalhePage() {
         </article>
         <article className="rounded-2xl border border-slate-300 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Ultima atualizacao
+            Última atualização
           </p>
           <p className="mt-3 text-sm font-semibold text-[#092946]">
             {formatDateTime(project?.updatedAt)}
@@ -239,7 +239,7 @@ export default function ProjetoDetalhePage() {
                 Dados do projeto
               </h3>
               <p className="text-sm text-slate-600">
-                Visualizacao separada da edicao para ficar mais legivel.
+                Visualização separada da edição para ficar mais legível.
               </p>
             </div>
           </div>
@@ -253,18 +253,18 @@ export default function ProjetoDetalhePage() {
             </div>
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Responsavel
+                Responsável
               </dt>
               <dd className="mt-1 font-semibold text-[#092946]">
-                {project?.owner ?? "Nao informado"}
+                {project?.owner ?? "Não informado"}
               </dd>
             </div>
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 md:col-span-2">
               <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Descricao
+                Descrição
               </dt>
               <dd className="mt-1 leading-6 text-slate-700">
-                {project?.description ?? "Sem descricao cadastrada."}
+                {project?.description ?? "Sem descrição cadastrada."}
               </dd>
             </div>
           </dl>
@@ -275,7 +275,7 @@ export default function ProjetoDetalhePage() {
           className="space-y-4 rounded-2xl border border-slate-300 bg-white p-5 shadow-sm"
         >
           <div>
-            <h3 className="text-base font-semibold text-[#092946]">Ajustes rapidos</h3>
+            <h3 className="text-base font-semibold text-[#092946]">Ajustes rápidos</h3>
             <p className="mt-1 text-sm text-slate-600">
               Atualize campos administrativos sem sair da tela.
             </p>
@@ -301,7 +301,7 @@ export default function ProjetoDetalhePage() {
               className="text-sm font-semibold text-[#092946]"
               htmlFor="description"
             >
-              Descricao
+              Descrição
             </label>
             <textarea
               id="description"
@@ -313,7 +313,7 @@ export default function ProjetoDetalhePage() {
 
           <div>
             <label className="text-sm font-semibold text-[#092946]" htmlFor="owner">
-              Responsavel
+              Responsável
             </label>
             <input
               id="owner"

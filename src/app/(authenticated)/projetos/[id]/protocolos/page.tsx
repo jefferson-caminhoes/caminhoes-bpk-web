@@ -273,13 +273,13 @@ export default function ProtocolosProjetoPage() {
               <tr>
                 <th className="px-4 py-3 font-semibold">Atividade</th>
                 <th className="px-4 py-3 font-semibold">Protocolo</th>
-                <th className="px-4 py-3 font-semibold">Responsavel</th>
+                <th className="px-4 py-3 font-semibold">Responsável</th>
                 <th className="px-4 py-3 font-semibold">Status manual</th>
                 <th className="px-4 py-3 font-semibold">Status externo</th>
                 <th className="px-4 py-3 font-semibold">Alertas</th>
-                <th className="px-4 py-3 font-semibold">Situacao</th>
+                <th className="px-4 py-3 font-semibold">Situação</th>
                 <th className="px-4 py-3 font-semibold">Abertura</th>
-                <th className="px-4 py-3 font-semibold">Ultima obs.</th>
+                <th className="px-4 py-3 font-semibold">Última obs.</th>
                 <th className="px-4 py-3 font-semibold">Monit.</th>
               </tr>
             </thead>

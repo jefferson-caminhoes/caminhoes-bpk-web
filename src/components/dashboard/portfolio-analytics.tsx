@@ -146,7 +146,7 @@ function TrendChart({
         </div>
         <span className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs font-semibold text-slate-200">
           <LineChart size={13} />
-          Visao historica
+          Visão histórica
         </span>
       </div>
       <div className="mt-5 rounded-3xl border border-slate-700 bg-gradient-to-b from-slate-900 to-slate-950 p-4">
@@ -526,10 +526,10 @@ export function PortfolioAnalytics() {
           <div className="max-w-3xl">
             <p className="inline-flex items-center gap-2 rounded-full border border-[#ee2331]/30 bg-[#fff1f2] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#ee2331]">
               <FolderKanban size={13} />
-              Centro de inteligencia da carteira
+              Centro de inteligência da carteira
             </p>
             <h2 className="mt-4 text-4xl font-semibold tracking-tight text-white">
-              Visao consolidada de risco, evolucao e prioridade.
+              Visão consolidada de risco, evolução e prioridade.
             </h2>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300">
               {insight}

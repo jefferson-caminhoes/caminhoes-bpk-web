@@ -222,18 +222,18 @@ export default function ProtocoloDetalhePage() {
           </p>
         </div>
         <p className="text-xs text-zinc-600">
-          Ultima consulta: {formatDateTime(protocol?.lastConsultationAt)}
+          Última consulta: {formatDateTime(protocol?.lastConsultationAt)}
         </p>
       </div>
 
       {protocol?.hasDivergence ? (
         <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-          Divergencia detectada entre status manual e status externo.
+          Divergência detectada entre status manual e status externo.
         </div>
       ) : null}
       {protocol?.notFoundOnSource ? (
         <div className="mt-3 rounded-lg border border-orange-200 bg-orange-50 p-3 text-sm text-orange-800">
-          Protocolo nao encontrado na ultima consulta da origem.
+          Protocolo não encontrado na última consulta da origem.
         </div>
       ) : null}
       {protocol && !protocol.monitoringEnabled ? (
@@ -271,10 +271,10 @@ export default function ProtocoloDetalhePage() {
         </article>
         <article className="rounded-lg border border-zinc-200 bg-white p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-            Responsavel
+            Responsável
           </p>
           <p className="mt-2 text-lg font-semibold text-zinc-900">
-            {protocol?.assignedToName ?? "Sem responsavel"}
+            {protocol?.assignedToName ?? "Sem responsável"}
           </p>
         </article>
       </div>
@@ -300,7 +300,7 @@ export default function ProtocoloDetalhePage() {
           </div>
           <div>
             <label className="text-sm font-medium text-zinc-700" htmlFor="protocolNumber">
-              Numero do protocolo
+              Número do protocolo
             </label>
             <input
               id="protocolNumber"
@@ -358,14 +358,14 @@ export default function ProtocoloDetalhePage() {
         <div className="grid gap-4 md:grid-cols-3">
           <div>
             <label className="text-sm font-medium text-zinc-700" htmlFor="owner">
-              Responsavel
+              Responsável
             </label>
             <select
               id="owner"
               {...register("owner")}
               className="mt-2 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
             >
-              <option value="">Sem responsavel</option>
+              <option value="">Sem responsável</option>
               {users.map((user) => (
                 <option key={user.id} value={user.id}>
                   {user.name}
@@ -386,7 +386,7 @@ export default function ProtocoloDetalhePage() {
           </div>
           <div>
             <label className="text-sm font-medium text-zinc-700" htmlFor="situation">
-              Situacao
+              Situação
             </label>
             <input
               id="situation"

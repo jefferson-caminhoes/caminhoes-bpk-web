@@ -311,7 +311,7 @@ export function ProjectsOverview() {
                 </div>
                 <div className="col-span-2">
                   <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Ultima atualizacao
+                    Ultima atualização
                   </dt>
                   <dd className="mt-1 text-slate-800">
                     {formatDateTime(report.project.updatedAt)}
