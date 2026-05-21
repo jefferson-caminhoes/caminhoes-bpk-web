@@ -8,13 +8,13 @@ type BrandLogoProps = {
 
 const sizeClasses = {
   sm: {
-    badge: "h-12 w-12",
-  },
-  md: {
     badge: "h-14 w-14",
   },
-  lg: {
+  md: {
     badge: "h-16 w-16",
+  },
+  lg: {
+    badge: "h-20 w-20",
   },
 } as const;
 
@@ -34,7 +34,7 @@ export function BrandLogo({ size = "md", className }: BrandLogoProps) {
           src="/logo-sistema.png"
           alt=""
           fill
-          sizes="56px"
+          sizes="72px"
           className="object-contain p-1"
           priority
         />

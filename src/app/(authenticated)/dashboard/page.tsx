@@ -11,6 +11,7 @@ import {
   Radar,
 } from "lucide-react";
 import { ErrorPanel, LoadingPanel } from "@/components/ui/feedback";
+import { PortfolioAnalytics } from "@/components/dashboard/portfolio-analytics";
 import { getDashboardSummary } from "@/services/dashboard-service";
 import { formatDateTime } from "@/lib/format-date";
 import type { DashboardSummary } from "@/types/dashboard";
@@ -195,6 +196,8 @@ export default function DashboardPage() {
           </div>
         </>
       ) : null}
+
+      <PortfolioAnalytics />
     </section>
   );
 }
