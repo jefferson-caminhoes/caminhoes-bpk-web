@@ -14,9 +14,11 @@ export function getApiErrorMessage(error: unknown, fallback: string) {
       return data;
     }
 
-    if (data?.message) return data.message;
-    if (data?.error) return data.error;
-    if (data?.detail) return data.detail;
+    if (typeof data === "object" && data !== null) {
+      if (data.message) return data.message;
+      if (data.error) return data.error;
+      if (data.detail) return data.detail;
+    }
   }
 
   if (error instanceof Error && error.message) {

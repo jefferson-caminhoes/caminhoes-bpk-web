@@ -36,34 +36,44 @@ export type ProtocolApiItem = {
   project_id?: string;
   activity?: string;
   atividade?: string;
+  // protocol number — actual API field is protocol_number
   protocolNumber?: string;
+  protocol_number?: string;
   numero_protocolo?: string;
   cnpj?: string;
   stakeholderName?: string | null;
   stakeholder_name?: string | null;
   stakeholderId?: string;
   stakeholder_id?: string;
+  // statuses — actual API fields are manual_status / external_status
   manualStatus?: string | null;
+  manual_status?: string | null;
   status_manual?: string | null;
   externalStatus?: string | null;
+  external_status?: string | null;
   status_externo?: string | null;
+  external_situation?: string | null;
+  // divergence — API has both has_divergence and computed has_status_divergence
   hasDivergence?: boolean;
+  has_divergence?: boolean;
   has_status_divergence?: boolean;
   situation?: string | null;
   situacao?: string | null;
   monitoringEnabled?: boolean;
   monitoring_enabled?: boolean;
+  // not-found — API returns found_in_last_search (true = found); computed not_found_on_source = !found
   notFoundOnSource?: boolean;
   not_found_on_source?: boolean;
+  found_in_last_search?: boolean;
   lastConsultationAt?: string | null;
   last_consultation_at?: string | null;
   last_consulted_at?: string | null;
   owner?: string | null;
   responsavel?: string | null;
+  assigned_to?: string | null;
   opening_date?: string | null;
   closing_date?: string | null;
   last_observation?: string | null;
-  assigned_to?: string | null;
   notes?: string | null;
   changeLogs?: ProtocolChangeLogApi[];
   auditLogs?: ProtocolChangeLogApi[];

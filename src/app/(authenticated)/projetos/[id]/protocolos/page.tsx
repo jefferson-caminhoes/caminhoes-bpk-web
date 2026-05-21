@@ -9,7 +9,9 @@ import {
   projectDetailsRoute,
 } from "@/lib/routes";
 import { listProjectProtocols } from "@/services/protocols-service";
+import { getProjectById } from "@/services/projects-service";
 import type { Protocol } from "@/types/protocol";
+import type { Project } from "@/types/project";
 
 type ViewMode = "lista" | "kanban";
 
@@ -18,6 +20,7 @@ export default function ProtocolosProjetoPage() {
   const projectId = params.id;
 
   const [protocols, setProtocols] = useState<Protocol[]>([]);
+  const [project, setProject] = useState<Project | null>(null);
   const [query, setQuery] = useState("");
   const [showOnlyDivergent, setShowOnlyDivergent] = useState(false);
   const [showOnlyNotFound, setShowOnlyNotFound] = useState(false);
@@ -30,8 +33,12 @@ export default function ProtocolosProjetoPage() {
     async function loadProtocols() {
       try {
         setError(null);
-        const data = await listProjectProtocols(projectId);
-        setProtocols(data);
+        const [protocolsData, projectData] = await Promise.all([
+          listProjectProtocols(projectId),
+          getProjectById(projectId),
+        ]);
+        setProtocols(protocolsData);
+        setProject(projectData);
       } catch {
         setError("Nao foi possivel carregar os protocolos deste projeto.");
       } finally {
@@ -81,7 +88,7 @@ export default function ProtocolosProjetoPage() {
           <p className="mt-2 text-sm text-zinc-600">
             Projeto:{" "}
             <Link href={projectDetailsRoute(projectId)} className="font-medium underline">
-              {projectId}
+              {project?.name ?? projectId}
             </Link>
           </p>
         </div>

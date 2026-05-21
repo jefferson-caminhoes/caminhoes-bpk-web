@@ -11,11 +11,11 @@ function normalizeStakeholder(item: StakeholderApiItem): Stakeholder {
     name: item.name ?? item.nome ?? "Sem nome",
     type: item.type ?? item.tipo ?? null,
     baseUrl: item.baseUrl ?? item.base_url ?? null,
-    queryTemplate: item.queryTemplate ?? item.template_consulta ?? null,
+    queryTemplate: item.queryTemplate ?? item.query_url_template ?? item.template_consulta ?? null,
     requiresJavascript:
-      item.requiresJavascript ?? item.requer_javascript ?? false,
-    hasCaptcha: item.hasCaptcha ?? item.tem_captcha ?? false,
-    requiresOffice: item.requiresOffice ?? item.exige_oficio ?? false,
+      item.requiresJavascript ?? item.requires_javascript ?? item.requer_javascript ?? false,
+    hasCaptcha: item.hasCaptcha ?? item.has_captcha ?? item.tem_captcha ?? false,
+    requiresOffice: item.requiresOffice ?? item.requires_oficio ?? item.exige_oficio ?? false,
     notes: item.notes ?? item.observacoes ?? null,
     active: item.active ?? item.ativo ?? true,
   };
@@ -24,12 +24,12 @@ function normalizeStakeholder(item: StakeholderApiItem): Stakeholder {
 function toApiPayload(payload: StakeholderUpsertPayload) {
   return {
     name: payload.name,
-    type: payload.type ?? null,
-    baseUrl: payload.baseUrl ?? null,
-    queryTemplate: payload.queryTemplate ?? null,
-    requiresJavascript: payload.requiresJavascript,
-    hasCaptcha: payload.hasCaptcha,
-    requiresOffice: payload.requiresOffice,
+    type: payload.type ?? "other",
+    base_url: payload.baseUrl ?? "",
+    query_url_template: payload.queryTemplate ?? null,
+    requires_javascript: payload.requiresJavascript,
+    has_captcha: payload.hasCaptcha,
+    requires_oficio: payload.requiresOffice,
     notes: payload.notes ?? null,
     active: payload.active,
   };

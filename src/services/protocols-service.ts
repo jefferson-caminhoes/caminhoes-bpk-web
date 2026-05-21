@@ -34,18 +34,21 @@ function normalizeProtocol(item: ProtocolApiItem): Protocol {
     id: item.id ?? item._id ?? "",
     projectId: item.projectId ?? item.project_id ?? "",
     activity: item.activity ?? item.atividade ?? "Sem atividade",
-    protocolNumber: item.protocolNumber ?? item.numero_protocolo ?? "",
+    protocolNumber: item.protocol_number ?? item.protocolNumber ?? item.numero_protocolo ?? "",
     cnpj: item.cnpj ?? "",
     stakeholderName: item.stakeholderName ?? item.stakeholder_name ?? null,
     stakeholderId: item.stakeholderId ?? item.stakeholder_id ?? "",
-    manualStatus: item.manualStatus ?? item.status_manual ?? null,
-    externalStatus: item.externalStatus ?? item.status_externo ?? null,
-    hasDivergence: item.hasDivergence ?? item.has_status_divergence ?? false,
-    situation: item.situation ?? item.situacao ?? null,
-    monitoringEnabled: item.monitoringEnabled ?? item.monitoring_enabled ?? true,
-    notFoundOnSource: item.notFoundOnSource ?? item.not_found_on_source ?? false,
+    manualStatus: item.manual_status ?? item.manualStatus ?? item.status_manual ?? null,
+    externalStatus: item.external_status ?? item.externalStatus ?? item.status_externo ?? null,
+    hasDivergence: item.has_divergence ?? item.hasDivergence ?? item.has_status_divergence ?? false,
+    situation: item.situation ?? item.external_situation ?? item.situacao ?? null,
+    monitoringEnabled: item.monitoring_enabled ?? item.monitoringEnabled ?? true,
+    notFoundOnSource:
+      item.notFoundOnSource ??
+      item.not_found_on_source ??
+      (item.found_in_last_search !== undefined ? !item.found_in_last_search : false),
     lastConsultationAt:
-      item.lastConsultationAt ?? item.last_consultation_at ?? item.last_consulted_at ?? null,
+      item.last_consulted_at ?? item.lastConsultationAt ?? item.last_consultation_at ?? null,
     owner: item.owner ?? item.responsavel ?? null,
     openingDate: item.opening_date ?? null,
     closingDate: item.closing_date ?? null,
@@ -64,13 +67,39 @@ export async function listProjectProtocols(projectId: string): Promise<Protocol[
   return rawItems.map(normalizeProtocol).filter((protocol) => protocol.id);
 }
 
+function toApiCreatePayload(payload: CreateProtocolPayload) {
+  return {
+    stakeholder_id: payload.stakeholderId,
+    cnpj: payload.cnpj,
+    protocol_number: payload.protocolNumber,
+    activity: payload.activity,
+    manual_status: payload.manualStatus ?? null,
+    situation: payload.situation ?? null,
+    monitoring_enabled: payload.monitoringEnabled,
+    assigned_to: payload.owner ?? null,
+  };
+}
+
+function toApiUpdatePayload(payload: UpdateProtocolPayload) {
+  return {
+    stakeholder_id: payload.stakeholderId,
+    cnpj: payload.cnpj,
+    protocol_number: payload.protocolNumber,
+    activity: payload.activity,
+    manual_status: payload.manualStatus ?? null,
+    situation: payload.situation ?? null,
+    monitoring_enabled: payload.monitoringEnabled,
+    assigned_to: payload.owner ?? null,
+  };
+}
+
 export async function createProtocol(
   projectId: string,
   payload: CreateProtocolPayload,
 ): Promise<Protocol> {
   const { data } = await api.post<ProtocolApiItem>(
     `/projects/${projectId}/protocols`,
-    payload,
+    toApiCreatePayload(payload),
   );
   return normalizeProtocol(data);
 }
@@ -92,7 +121,7 @@ export async function updateProtocol(
 ): Promise<Protocol> {
   const { data } = await api.patch<ProtocolApiItem>(
     `/projects/${projectId}/protocols/${protocolId}`,
-    payload,
+    toApiUpdatePayload(payload),
   );
   return normalizeProtocol(data);
 }
@@ -102,12 +131,8 @@ export async function finalizeProtocol(
   protocolId: string,
 ): Promise<Protocol> {
   const { data } = await api.patch<ProtocolApiItem>(
-    `/projects/${projectId}/protocols/${protocolId}`,
-    {
-      monitoringEnabled: false,
-      situation: "Finalizado pelo usuario",
-      closedManually: true,
-    },
+    `/projects/${projectId}/protocols/${protocolId}/close`,
+    {},
   );
   return normalizeProtocol(data);
 }
@@ -117,11 +142,8 @@ export async function reopenProtocolMonitoring(
   protocolId: string,
 ): Promise<Protocol> {
   const { data } = await api.patch<ProtocolApiItem>(
-    `/projects/${projectId}/protocols/${protocolId}`,
-    {
-      monitoringEnabled: true,
-      closedManually: false,
-    },
+    `/projects/${projectId}/protocols/${protocolId}/reopen`,
+    { monitoring_enabled: true },
   );
   return normalizeProtocol(data);
 }

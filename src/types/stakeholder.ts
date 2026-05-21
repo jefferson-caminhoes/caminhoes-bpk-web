@@ -21,12 +21,16 @@ export type StakeholderApiItem = {
   baseUrl?: string | null;
   base_url?: string | null;
   queryTemplate?: string | null;
+  query_url_template?: string | null;
   template_consulta?: string | null;
   requiresJavascript?: boolean;
+  requires_javascript?: boolean;
   requer_javascript?: boolean;
   hasCaptcha?: boolean;
+  has_captcha?: boolean;
   tem_captcha?: boolean;
   requiresOffice?: boolean;
+  requires_oficio?: boolean;
   exige_oficio?: boolean;
   notes?: string | null;
   observacoes?: string | null;

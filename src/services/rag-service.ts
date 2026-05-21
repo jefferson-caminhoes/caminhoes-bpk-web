@@ -38,7 +38,7 @@ function normalizeSources(raw: RagSourceApi[] | undefined): RagSource[] {
 
 export async function sendRagChat(question: string): Promise<RagChatResponse> {
   const { data } = await api.post<RagChatResponseApi>("/rag/chat", {
-    question,
+    message: question,
   });
 
   const answer =

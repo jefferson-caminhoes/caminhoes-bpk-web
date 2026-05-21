@@ -10,9 +10,11 @@ function normalizeProject(item: ProjectsApiItem): Project {
     id: item.id ?? item._id ?? "",
     name: item.name ?? item.nome ?? "Sem nome",
     description: item.description ?? item.descricao ?? null,
-    owner: item.owner ?? item.responsavel ?? null,
+    owner: item.owner ?? item.responsible ?? item.responsavel ?? null,
     active: item.active ?? item.ativo ?? true,
-    protocolsCount: item.protocolsCount ?? item.protocolos_count ?? null,
+    protocolsCount: item.protocolsCount ?? item.protocol_count ?? item.protocolos_count ?? null,
+    hasDivergence: item.has_divergence ?? false,
+    hasNotFound: item.has_not_found ?? false,
     updatedAt: item.updatedAt ?? item.updated_at ?? null,
   };
 }
@@ -21,7 +23,7 @@ function toApiPayload(payload: ProjectUpsertPayload) {
   return {
     name: payload.name,
     description: payload.description ?? null,
-    owner: payload.owner ?? null,
+    responsible: payload.owner ?? null,
     active: payload.active,
   };
 }
