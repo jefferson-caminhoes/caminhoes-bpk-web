@@ -169,41 +169,66 @@ export default function ProtocolosProjetoPage() {
           <table className="w-full text-left text-sm">
             <thead className="bg-zinc-50 text-zinc-600">
               <tr>
-                <th className="px-4 py-3 font-medium">Atividade</th>
-                <th className="px-4 py-3 font-medium">Protocolo</th>
-                <th className="px-4 py-3 font-medium">CNPJ</th>
-                <th className="px-4 py-3 font-medium">Stakeholder</th>
-                <th className="px-4 py-3 font-medium">Status manual</th>
-                <th className="px-4 py-3 font-medium">Status externo</th>
-                <th className="px-4 py-3 font-medium">Divergencia</th>
-                <th className="px-4 py-3 font-medium">Situacao</th>
-                <th className="px-4 py-3 font-medium">Monitoramento</th>
-                <th className="px-4 py-3 font-medium">Nao encontrado</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Atividade</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Protocolo</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Atribuido</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Status manual</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Status externo</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Divergencia</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Situacao</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Data Abertura</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Ultima Obs.</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Monit.</th>
               </tr>
             </thead>
             <tbody>
               {filteredProtocols.map((protocol) => (
-                <tr key={protocol.id} className="border-t border-zinc-200">
+                <tr key={protocol.id} className="border-t border-zinc-200 hover:bg-zinc-50 transition-colors">
                   <td className="px-4 py-3">{protocol.activity}</td>
                   <td className="px-4 py-3">
                     <Link
                       href={projectProtocolDetailsRoute(projectId, protocol.id)}
-                      className="font-medium underline"
+                      className="font-medium underline text-zinc-900"
                     >
                       {protocol.protocolNumber}
                     </Link>
+                    <div className="text-[10px] text-zinc-400">{protocol.cnpj}</div>
                   </td>
-                  <td className="px-4 py-3">{protocol.cnpj}</td>
-                  <td className="px-4 py-3">{protocol.stakeholderName ?? "-"}</td>
-                  <td className="px-4 py-3">{protocol.manualStatus ?? "-"}</td>
-                  <td className="px-4 py-3">{protocol.externalStatus ?? "-"}</td>
-                  <td className="px-4 py-3">{protocol.hasDivergence ? "Sim" : "Nao"}</td>
-                  <td className="px-4 py-3">{protocol.situation ?? "-"}</td>
+                  <td className="px-4 py-3">{protocol.assignedTo ?? protocol.owner ?? "-"}</td>
                   <td className="px-4 py-3">
-                    {protocol.monitoringEnabled ? "Ativo" : "Inativo"}
+                    <span className="px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700 font-medium text-[11px]">
+                      {protocol.manualStatus ?? "N/A"}
+                    </span>
                   </td>
                   <td className="px-4 py-3">
-                    {protocol.notFoundOnSource ? "Sim" : "Nao"}
+                    <span className={`px-2 py-0.5 rounded-full font-medium text-[11px] ${
+                      protocol.externalStatus ? "bg-blue-50 text-blue-700" : "bg-zinc-100 text-zinc-500"
+                    }`}>
+                      {protocol.externalStatus ?? "-"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {protocol.hasDivergence ? (
+                      <span className="text-red-600 font-semibold text-[11px] flex items-center gap-1">
+                        ⚠️ Sim
+                      </span>
+                    ) : (
+                      <span className="text-emerald-600 text-[11px]">Nao</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-zinc-600 max-w-[150px] truncate" title={protocol.situation ?? ""}>
+                    {protocol.situation ?? "-"}
+                  </td>
+                  <td className="px-4 py-3 text-zinc-500">
+                    {protocol.openingDate ? new Date(protocol.openingDate).toLocaleDateString('pt-BR') : "-"}
+                  </td>
+                  <td className="px-4 py-3 text-zinc-500 max-w-[200px] truncate" title={protocol.lastObservation ?? ""}>
+                    {protocol.lastObservation ?? "-"}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <span className={`h-2 w-2 rounded-full inline-block ${
+                      protocol.monitoringEnabled ? "bg-emerald-500" : "bg-zinc-300"
+                    }`} title={protocol.monitoringEnabled ? "Ativo" : "Inativo"} />
                   </td>
                 </tr>
               ))}

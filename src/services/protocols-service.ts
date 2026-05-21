@@ -45,8 +45,13 @@ function normalizeProtocol(item: ProtocolApiItem): Protocol {
     monitoringEnabled: item.monitoringEnabled ?? item.monitoring_enabled ?? true,
     notFoundOnSource: item.notFoundOnSource ?? item.not_found_on_source ?? false,
     lastConsultationAt:
-      item.lastConsultationAt ?? item.last_consultation_at ?? null,
+      item.lastConsultationAt ?? item.last_consultation_at ?? item.last_consulted_at ?? null,
     owner: item.owner ?? item.responsavel ?? null,
+    openingDate: item.opening_date ?? null,
+    closingDate: item.closing_date ?? null,
+    lastObservation: item.last_observation ?? null,
+    assignedTo: item.assigned_to ?? null,
+    notes: item.notes ?? null,
     changeLogs,
   };
 }

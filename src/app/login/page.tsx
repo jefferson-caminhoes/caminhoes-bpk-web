@@ -37,7 +37,7 @@ export default function LoginPage() {
 
     try {
       const response: LoginResponse = await login(data);
-      const token = response.token;
+      const token = response.access_token;
 
       if (!token) {
         throw new Error("Token nao encontrado na resposta.");

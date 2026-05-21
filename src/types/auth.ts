@@ -4,5 +4,11 @@ export type LoginRequest = {
 };
 
 export type LoginResponse = {
-  token: string;
+  access_token: string;
+  token_type: string;
+  user: {
+    id: string;
+    email: string;
+    role: string;
+  };
 };
