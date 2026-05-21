@@ -8,13 +8,13 @@ type BrandLogoProps = {
 
 const sizeClasses = {
   sm: {
-    badge: "h-[72px] w-[72px]",
+    badge: "h-[88px] w-[88px]",
   },
   md: {
-    badge: "h-[84px] w-[84px]",
+    badge: "h-[120px] w-[120px]",
   },
   lg: {
-    badge: "h-[96px] w-[96px]",
+    badge: "h-[144px] w-[144px]",
   },
 } as const;
 
@@ -22,10 +22,10 @@ export function BrandLogo({ size = "md", className }: BrandLogoProps) {
   const styles = sizeClasses[size];
 
   return (
-    <div className={cn("flex items-center gap-3", className)}>
+    <div className={cn("flex items-center justify-center gap-3", className)}>
       <div
         className={cn(
-          "relative shrink-0 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200",
+          "relative shrink-0 flex items-center justify-center p-0",
           styles.badge,
         )}
         aria-hidden="true"
@@ -34,8 +34,8 @@ export function BrandLogo({ size = "md", className }: BrandLogoProps) {
           src="/logo-sistema.png"
           alt=""
           fill
-          sizes="96px"
-          className="object-contain p-1"
+          sizes="120px"
+          className="object-contain"
           priority
         />
       </div>
